@@ -730,9 +730,7 @@ async function registerUser(
     try {
 
         response =
-            await fetch(
-                `${API}/register`,
-                {
+            await fetch("/register", {
                     method: "POST",
 
                     body: formData,
