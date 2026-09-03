@@ -721,9 +721,9 @@ async function registerUser(
     );
 
     formData.append(
-        "phone",
-        phone
-    );
+    "mobile",
+    phone.replace("+98", "0")
+);
 
     let response;
 
