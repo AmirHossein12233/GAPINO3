@@ -1,0 +1,11 @@
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.env
+
+data/users.json
+data/messages.json
+data/otp.json
+data/unread.json
+data/uploads/

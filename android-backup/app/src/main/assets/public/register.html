@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+
+```
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<meta name="theme-color" content="#2563eb">
+
+<title>ثبت نام در GAPINO</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family:
+            Tahoma,
+            Arial,
+            sans-serif;
+
+        background:
+            linear-gradient(
+                135deg,
+                #eff6ff,
+                #dbeafe,
+                #f8fafc
+            );
+
+        color: #0f172a;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 20px;
+    }
+
+    .page {
+        width: 100%;
+        max-width: 430px;
+    }
+
+    .card {
+        width: 100%;
+
+        background:
+            rgba(
+                255,
+                255,
+                255,
+                0.97
+            );
+
+        border-radius: 28px;
+
+        padding:
+            30px
+            24px
+            24px;
+
+        border:
+            1px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.8
+            );
+
+        box-shadow:
+            0 20px 60px
+            rgba(
+                15,
+                23,
+                42,
+                0.15
+            );
+    }
+
+    .logo {
+        width: 76px;
+        height: 76px;
+
+        margin:
+            0
+            auto
+            16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 22px;
+
+        background: #2563eb;
+
+        color: white;
+
+        font-size: 28px;
+        font-weight: 900;
+
+        box-shadow:
+            0 12px 30px
+            rgba(
+                37,
+                99,
+                235,
+                0.3
+            );
+    }
+
+    h1 {
+        margin: 0;
+
+        text-align: center;
+
+        font-size: 27px;
+        font-weight: 900;
+    }
+
+    .subtitle {
+        margin:
+            10px
+            0
+            26px;
+
+        text-align: center;
+
+        color: #64748b;
+
+        font-size: 14px;
+
+        line-height: 1.8;
+    }
+
+    .field {
+        margin-bottom: 16px;
+    }
+
+    .label {
+        display: block;
+
+        margin-bottom: 8px;
+
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .input-wrap {
+        position: relative;
+        width: 100%;
+    }
+
+    input {
+        width: 100%;
+        height: 52px;
+
+        border:
+            1px solid
+            #cbd5e1;
+
+        border-radius: 15px;
+
+        background: #f8fafc;
+
+        outline: none;
+
+        padding:
+            0
+            16px;
+
+        font-size: 16px;
+
+        direction: rtl;
+
+        transition:
+            border-color 0.2s,
+            box-shadow 0.2s,
+            background 0.2s;
+    }
+
+    input:focus {
+        border-color: #2563eb;
+
+        background: white;
+
+        box-shadow:
+            0 0 0 4px
+            rgba(
+                37,
+                99,
+                235,
+                0.1
+            );
+    }
+
+    .password-input {
+        padding-left: 55px;
+    }
+
+    .password-toggle {
+        position: absolute;
+
+        left: 8px;
+        top: 50%;
+
+        transform:
+            translateY(-50%);
+
+        width: 42px;
+        height: 42px;
+
+        border: 0;
+
+        background: transparent;
+
+        cursor: pointer;
+
+        font-size: 20px;
+
+        border-radius: 12px;
+    }
+
+    .password-toggle:active {
+        background: #e2e8f0;
+    }
+
+    .hint {
+        margin-top: 7px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+
+        line-height: 1.7;
+    }
+
+    .register-btn {
+        width: 100%;
+        height: 54px;
+
+        margin-top: 5px;
+
+        border: 0;
+
+        border-radius: 16px;
+
+        background: #2563eb;
+
+        color: white;
+
+        font-size: 17px;
+        font-weight: 800;
+
+        cursor: pointer;
+
+        transition:
+            transform 0.15s,
+            opacity 0.15s;
+    }
+
+    .register-btn:active {
+        transform: scale(0.98);
+    }
+
+    .register-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .message {
+        display: none;
+
+        margin-top: 15px;
+
+        padding:
+            12px
+            14px;
+
+        border-radius: 13px;
+
+        font-size: 14px;
+
+        line-height: 1.7;
+
+        text-align: center;
+    }
+
+    .message.show {
+        display: block;
+    }
+
+    .message.error {
+        background: #fef2f2;
+
+        color: #b91c1c;
+
+        border:
+            1px solid
+            #fecaca;
+    }
+
+    .message.success {
+        background: #f0fdf4;
+
+        color: #15803d;
+
+        border:
+            1px solid
+            #bbf7d0;
+    }
+
+    .login-box {
+        margin-top: 22px;
+
+        padding-top: 20px;
+
+        border-top:
+            1px solid
+            #e2e8f0;
+
+        text-align: center;
+
+        color: #64748b;
+
+        font-size: 14px;
+    }
+
+    .login-box a {
+        color: #2563eb;
+
+        text-decoration: none;
+
+        font-weight: 800;
+    }
+
+    .server-status {
+        margin-top: 18px;
+
+        text-align: center;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+
+        direction: ltr;
+
+        word-break: break-all;
+    }
+
+    .spinner {
+        display: inline-block;
+
+        width: 18px;
+        height: 18px;
+
+        border:
+            3px solid
+            rgba(
+                255,
+                255,
+                255,
+                0.4
+            );
+
+        border-top-color: white;
+
+        border-radius: 50%;
+
+        animation:
+            spin
+            0.8s
+            linear
+            infinite;
+
+        vertical-align: middle;
+
+        margin-left: 8px;
+    }
+
+    @keyframes spin {
+        to {
+            transform:
+                rotate(360deg);
+        }
+    }
+
+    @media (max-width: 420px) {
+        body {
+            padding: 12px;
+        }
+
+        .card {
+            padding:
+                24px
+                18px
+                20px;
+
+            border-radius: 24px;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+<div class="page">
+
+```
+<div class="card">
+
+    <div class="logo">
+        G
+    </div>
+
+    <h1>
+        ثبت نام در GAPINO
+    </h1>
+
+    <div class="subtitle">
+        حساب کاربری خود را بسازید و وارد GAPINO شوید.
+    </div>
+
+
+    <form id="registerForm">
+
+
+        <div class="field">
+
+            <label
+                class="label"
+                for="username"
+            >
+                نام کاربری
+            </label>
+
+            <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                placeholder="نام کاربری خود را وارد کنید"
+                maxlength="50"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label
+                class="label"
+                for="password"
+            >
+                رمز عبور
+            </label>
+
+            <div class="input-wrap">
+
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    class="password-input"
+                    autocomplete="new-password"
+                    placeholder="رمز عبور خود را وارد کنید"
+                    maxlength="200"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    id="togglePassword"
+                    aria-label="نمایش رمز عبور"
+                >
+                    👁
+                </button>
+
+            </div>
+
+            <div class="hint">
+                رمز عبور خود را با دقت وارد کنید.
+            </div>
+
+        </div>
+
+
+        <div class="field">
+
+            <label
+                class="label"
+                for="confirmPassword"
+            >
+                تکرار رمز عبور
+            </label>
+
+            <div class="input-wrap">
+
+                <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    class="password-input"
+                    autocomplete="new-password"
+                    placeholder="رمز عبور را دوباره وارد کنید"
+                    maxlength="200"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    id="toggleConfirmPassword"
+                    aria-label="نمایش رمز عبور"
+                >
+                    👁
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="register-btn"
+            id="registerButton"
+            type="submit"
+        >
+            ثبت نام
+        </button>
+
+    </form>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <div class="bottom">
+
+    اگه حساب ساخته‌ای و داری؟
+
+    <button
+        id="loginLink"
+        class="link-button"
+        type="button"
+    >
+        ورود به حساب
+    </button>
+
+</div>
+
+
+    <div class="server-status">
+        API:
+        https://gapino3.onrender.com
+    </div>
+
+</div>
+```
+
+</div>
+
+<script>
+"use strict";
+
+
+/*
+    ==========================================
+    GAPINO API
+    ==========================================
+*/
+
+const API_BASE_URL =
+    "https://gapino3.onrender.com";
+
+
+/*
+    ==========================================
+    DOM
+    ==========================================
+*/
+
+const registerForm =
+    document.getElementById(
+        "registerForm"
+    );
+
+const usernameInput =
+    document.getElementById(
+        "username"
+    );
+
+const passwordInput =
+    document.getElementById(
+        "password"
+    );
+
+const confirmPasswordInput =
+    document.getElementById(
+        "confirmPassword"
+    );
+
+const togglePassword =
+    document.getElementById(
+        "togglePassword"
+    );
+
+const toggleConfirmPassword =
+    document.getElementById(
+        "toggleConfirmPassword"
+    );
+
+const registerButton =
+    document.getElementById(
+        "registerButton"
+    );
+
+const messageBox =
+    document.getElementById(
+        "message"
+    );
+
+
+/*
+    ==========================================
+    Message
+    ==========================================
+*/
+
+function showMessage(
+    text,
+    type = "error"
+) {
+    messageBox.textContent =
+        text;
+
+    messageBox.className =
+        "message show " +
+        type;
+}
+
+function hideMessage() {
+    messageBox.textContent =
+        "";
+
+    messageBox.className =
+        "message";
+}
+
+
+/*
+    ==========================================
+    Loading
+    ==========================================
+*/
+
+function setLoading(
+    loading
+) {
+    registerButton.disabled =
+        loading;
+
+    if (loading) {
+
+        registerButton.innerHTML =
+            '<span class="spinner"></span>در حال ثبت نام...';
+
+    } else {
+
+        registerButton.textContent =
+            "ثبت نام";
+    }
+}
+
+
+/*
+    ==========================================
+    Password toggle
+    ==========================================
+*/
+
+togglePassword.addEventListener(
+    "click",
+    () => {
+
+        const isPassword =
+            passwordInput.type ===
+            "password";
+
+        passwordInput.type =
+            isPassword
+                ? "text"
+                : "password";
+
+        togglePassword.textContent =
+            isPassword
+                ? "🙈"
+                : "👁";
+
+    }
+);
+
+toggleConfirmPassword.addEventListener(
+    "click",
+    () => {
+
+        const isPassword =
+            confirmPasswordInput.type ===
+            "password";
+
+        confirmPasswordInput.type =
+            isPassword
+                ? "text"
+                : "password";
+
+        toggleConfirmPassword.textContent =
+            isPassword
+                ? "🙈"
+                : "👁";
+
+    }
+);
+
+
+/*
+    ==========================================
+    Register
+    ==========================================
+*/
+
+registerForm.addEventListener(
+    "submit",
+    async (event) => {
+
+        event.preventDefault();
+
+        hideMessage();
+
+
+        const username =
+            usernameInput.value.trim();
+
+        const password =
+            passwordInput.value;
+
+        const confirmPassword =
+            confirmPasswordInput.value;
+
+
+        /*
+            اعتبارسنجی نام کاربری
+        */
+
+        if (!username) {
+
+            showMessage(
+                "نام کاربری را وارد کنید.",
+                "error"
+            );
+
+            usernameInput.focus();
+
+            return;
+        }
+
+
+        if (username.length < 3) {
+
+            showMessage(
+                "نام کاربری باید حداقل ۳ کاراکتر باشد.",
+                "error"
+            );
+
+            usernameInput.focus();
+
+            return;
+        }
+
+
+        /*
+            اعتبارسنجی رمز
+        */
+
+        if (!password) {
+
+            showMessage(
+                "رمز عبور را وارد کنید.",
+                "error"
+            );
+
+            passwordInput.focus();
+
+            return;
+        }
+
+
+        if (password.length < 6) {
+
+            showMessage(
+                "رمز عبور باید حداقل ۶ کاراکتر باشد.",
+                "error"
+            );
+
+            passwordInput.focus();
+
+            return;
+        }
+
+
+        /*
+            تطبیق رمزها
+        */
+
+        if (
+            password !==
+            confirmPassword
+        ) {
+
+            showMessage(
+                "رمز عبور و تکرار آن یکسان نیست.",
+                "error"
+            );
+
+            confirmPasswordInput.focus();
+
+            return;
+        }
+
+
+        setLoading(true);
+
+
+        /*
+            FormData
+        */
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "username",
+            username
+        );
+
+        formData.append(
+            "password",
+            password
+        );
+
+
+        try {
+
+            /*
+                ارسال مستقیم به Render
+            */
+
+            const response =
+                await fetch(
+                    `${API_BASE_URL}/register`,
+                    {
+                        method: "POST",
+
+                        body: formData,
+
+                        credentials:
+                            "include",
+
+                        cache:
+                            "no-store"
+                    }
+                );
+
+
+            let data = null;
+
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch (_) {
+
+                data = null;
+
+            }
+
+
+            /*
+                خطای سرور
+            */
+
+            if (!response.ok) {
+
+                showMessage(
+                    data?.message ||
+                    "ثبت نام انجام نشد.",
+                    "error"
+                );
+
+                setLoading(false);
+
+                return;
+            }
+
+
+            /*
+                ثبت نام موفق
+            */
+
+            showMessage(
+                "ثبت نام با موفقیت انجام شد. در حال انتقال به صفحه ورود...",
+                "success"
+            );
+
+
+            /*
+                ذخیره اطلاعات کاربر
+                فقط اگر سرور اطلاعات کاربر بدهد.
+            */
+
+            if (
+                data &&
+                data.user &&
+                data.user.id
+            ) {
+
+                localStorage.setItem(
+                    "gapino_user",
+                    JSON.stringify(
+                        data.user
+                    )
+                );
+
+            }
+
+
+            /*
+                بسیار مهم:
+                صفحه login داخل خود APK باز می‌شود.
+            */
+
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "login.html";
+
+                },
+                700
+            );
+
+        } catch (error) {
+
+            console.error(
+                "GAPINO register error:",
+                error
+            );
+
+
+            showMessage(
+                "خطا در اتصال به سرور GAPINO. اتصال اینترنت را بررسی کنید.",
+                "error"
+            );
+
+
+            setLoading(false);
+
+        }
+
+    }
+);
+
+
+/*
+    ==========================================
+    شروع
+    ==========================================
+*/
+
+window.addEventListener(
+    "load",
+    () => {
+
+        usernameInput.focus();
+
+    }
+);
+
+</script>
+
+</body>
+</html>

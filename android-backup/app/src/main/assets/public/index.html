@@ -1,0 +1,543 @@
+```html
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#527bc7"
+    >
+
+    <title>GAPINO</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family:
+                Tahoma,
+                Arial,
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(82, 123, 199, 0.18),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom left,
+                    rgba(82, 123, 199, 0.12),
+                    transparent 35%
+                ),
+                #f4f7fb;
+
+            color: #172033;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .page {
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto;
+
+            padding:
+                75px
+                20px
+                45px;
+
+            text-align: center;
+        }
+
+        .logo {
+            width: 112px;
+            height: 112px;
+
+            margin: 0 auto 24px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 32px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #527bc7,
+                    #456db7
+                );
+
+            color: #fff;
+
+            font-size: 27px;
+            font-weight: 900;
+
+            box-shadow:
+                0 22px 50px
+                rgba(82, 123, 199, 0.28);
+        }
+
+        .title {
+            margin: 0;
+
+            font-size: 38px;
+
+            font-weight: 900;
+
+            line-height: 1.6;
+        }
+
+        .description {
+            max-width: 650px;
+
+            margin:
+                15px
+                auto
+                30px;
+
+            color: #68758a;
+
+            font-size: 16px;
+
+            line-height: 2;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+
+            gap: 14px;
+
+            flex-wrap: wrap;
+        }
+
+        .button {
+            min-width: 200px;
+
+            min-height: 55px;
+
+            padding:
+                0
+                25px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 15px;
+
+            font-size: 15px;
+
+            font-weight: 900;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .button:hover {
+            transform:
+                translateY(-2px);
+        }
+
+        .login-button {
+            background:
+                linear-gradient(
+                    135deg,
+                    #527bc7,
+                    #456db7
+                );
+
+            color: #fff;
+
+            box-shadow:
+                0 12px 28px
+                rgba(82, 123, 199, 0.24);
+        }
+
+        .login-button:hover {
+            box-shadow:
+                0 17px 35px
+                rgba(82, 123, 199, 0.30);
+        }
+
+        .register-button {
+            background: #fff;
+
+            color: #456db7;
+
+            border:
+                1px solid
+                #dce4ef;
+        }
+
+        .register-button:hover {
+            border-color:
+                #527bc7;
+
+            background:
+                #f8faff;
+        }
+
+        .features {
+            width: 100%;
+            max-width: 1050px;
+
+            margin:
+                0 auto
+                50px;
+
+            padding:
+                0 20px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(
+                        0,
+                        1fr
+                    )
+                );
+
+            gap: 20px;
+        }
+
+        .feature {
+            padding:
+                28px
+                20px;
+
+            text-align: center;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.95
+                );
+
+            border:
+                1px solid
+                #e1e7ef;
+
+            border-radius:
+                22px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(15, 23, 42, 0.06);
+
+            transition:
+                transform 0.2s ease;
+        }
+
+        .feature:hover {
+            transform:
+                translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 68px;
+            height: 68px;
+
+            margin:
+                0
+                auto
+                15px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 19px;
+
+            background:
+                #eef4ff;
+
+            font-size: 29px;
+        }
+
+        .feature h2 {
+            margin:
+                0
+                0
+                8px;
+
+            font-size: 18px;
+
+            font-weight: 900;
+        }
+
+        .feature p {
+            margin: 0;
+
+            color: #718096;
+
+            font-size: 13px;
+
+            line-height: 1.9;
+        }
+
+        .footer {
+            margin-top: auto;
+
+            padding:
+                28px
+                20px;
+
+            text-align: center;
+
+            color: #8994a6;
+
+            font-size: 13px;
+        }
+
+        @media (max-width: 760px) {
+
+            .hero {
+                padding:
+                    55px
+                    16px
+                    35px;
+            }
+
+            .logo {
+                width: 92px;
+                height: 92px;
+
+                border-radius: 26px;
+
+                font-size: 23px;
+            }
+
+            .title {
+                font-size: 28px;
+            }
+
+            .description {
+                font-size: 14px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+
+                max-width: 520px;
+            }
+        }
+
+        @media (max-width: 460px) {
+
+            .hero {
+                padding-top: 40px;
+            }
+
+            .title {
+                font-size: 23px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+
+            body {
+                background:
+                    radial-gradient(
+                        circle at top right,
+                        rgba(82, 123, 199, 0.20),
+                        transparent 35%
+                    ),
+                    #111827;
+
+                color: #f8fafc;
+            }
+
+            .description {
+                color: #aab5c6;
+            }
+
+            .feature {
+                background:
+                    #182231;
+
+                border-color:
+                    #2a394e;
+            }
+
+            .feature p {
+                color: #aab5c6;
+            }
+
+            .feature-icon {
+                background:
+                    #213047;
+            }
+
+            .register-button {
+                background:
+                    #182231;
+
+                color:
+                    #8fb1f0;
+
+                border-color:
+                    #33445d;
+            }
+
+            .register-button:hover {
+                background:
+                    #202d40;
+            }
+
+            .footer {
+                color:
+                    #8a97ab;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <section class="hero">
+
+        <div class="logo">
+            GAPINO
+        </div>
+
+        <h1 class="title">
+            پیام‌رسان ساده، سریع و خصوصی
+        </h1>
+
+        <p class="description">
+            با دوستانت گفتگو کن، پیام بفرست
+            و فایل و عکس به اشتراک بگذار.
+        </p>
+
+        <div class="buttons">
+
+            <a
+                href="/login.html"
+                class="button login-button"
+            >
+                ورود به GAPINO
+            </a>
+
+            <a
+                href="/register.html"
+                class="button register-button"
+            >
+                ساخت حساب جدید
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="features">
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                💬
+            </div>
+
+            <h2>
+                چت خصوصی
+            </h2>
+
+            <p>
+                با دوستانت به‌صورت خصوصی گفتگو کن.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📷
+            </div>
+
+            <h2>
+                ارسال عکس
+            </h2>
+
+            <p>
+                عکس‌های خودت را به‌آسانی ارسال کن.
+            </p>
+
+        </div>
+
+
+        <div class="feature">
+
+            <div class="feature-icon">
+                📎
+            </div>
+
+            <h2>
+                ارسال فایل
+            </h2>
+
+            <p>
+                فایل‌های مختلف را با دوستانت به اشتراک بگذار.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <footer class="footer">
+        GAPINO
+    </footer>
+
+</div>
+
+</body>
+</html>
+```

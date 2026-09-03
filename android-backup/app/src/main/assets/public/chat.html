@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#527bc7"
+    >
+
+    <meta
+        name="description"
+        content="GAPINO Messenger"
+    >
+
+    <link
+        rel="icon"
+        href="data:,"
+    >
+
+    <title>GAPINO</title>
+
+    <link
+        rel="stylesheet"
+        href="/style.css"
+    >
+
+    <style>
+
+        /* =====================================================
+           MODAL FIX
+        ===================================================== */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+
+            z-index: 1000;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+
+            background:
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.42
+                );
+
+            backdrop-filter:
+                blur(4px);
+        }
+
+
+        .modal.hidden {
+            display: none !important;
+        }
+
+
+        .modal[hidden] {
+            display: none !important;
+        }
+
+
+        .modal-content {
+            width:
+                min(
+                    450px,
+                    100%
+                );
+
+            max-height:
+                calc(
+                    100vh - 40px
+                );
+
+            overflow-y:
+                auto;
+
+            padding:
+                24px;
+
+            background:
+                #ffffff;
+
+            border:
+                1px solid #e3e8f0;
+
+            border-radius:
+                22px;
+
+            box-shadow:
+                0 25px 80px
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.20
+                );
+        }
+
+
+        .modal-content form {
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                10px;
+        }
+
+
+        .modal-content input,
+        .modal-content textarea {
+            width: 100%;
+
+            padding:
+                11px 13px;
+
+            border:
+                1px solid #e3e8f0;
+
+            border-radius:
+                13px;
+
+            outline: none;
+
+            background:
+                #f8fafc;
+
+            color:
+                #172033;
+
+            font: inherit;
+        }
+
+
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            border-color:
+                #527bc7;
+
+            background:
+                #ffffff;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(
+                    82,
+                    123,
+                    199,
+                    0.10
+                );
+        }
+
+
+        .modal-content form > button[type="submit"] {
+            min-height:
+                48px;
+
+            margin-top:
+                6px;
+
+            border:
+                0;
+
+            border-radius:
+                13px;
+
+            background:
+                #527bc7;
+
+            color:
+                #ffffff;
+
+            font-weight:
+                800;
+
+            cursor:
+                pointer;
+        }
+
+
+        .modal-content form > button[type="submit"]:hover {
+            background:
+                #3f65aa;
+        }
+
+
+        .modal-close-button {
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border:
+                0;
+
+            border-radius:
+                11px;
+
+            background:
+                #f1f5f9;
+
+            font-size:
+                22px;
+
+            cursor:
+                pointer;
+        }
+
+
+        .modal-header {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                10px;
+
+            margin-bottom:
+                18px;
+        }
+
+
+        /* =====================================================
+           PROFILE AVATAR
+        ===================================================== */
+
+        .profile-avatar-preview {
+            width:
+                96px;
+
+            height:
+                96px;
+
+            margin:
+                0 auto 12px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            overflow:
+                hidden;
+
+            border-radius:
+                50%;
+
+            background:
+                #eef4ff;
+
+            color:
+                #527bc7;
+
+            font-size:
+                34px;
+
+            font-weight:
+                900;
+        }
+
+
+        .profile-avatar-preview img {
+            width:
+                100%;
+
+            height:
+                100%;
+
+            object-fit:
+                cover;
+        }
+
+
+        .profile-avatar-actions {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            flex-wrap:
+                wrap;
+
+            gap:
+                8px;
+
+            margin-bottom:
+                8px;
+        }
+
+
+        .profile-avatar-actions button {
+            min-height:
+                42px;
+
+            padding:
+                8px 14px;
+
+            border:
+                0;
+
+            border-radius:
+                12px;
+
+            font-weight:
+                800;
+
+            cursor:
+                pointer;
+        }
+
+
+        .profile-avatar-help {
+            margin:
+                0 0 15px;
+
+            text-align:
+                center;
+
+            color:
+                #64748b;
+
+            font-size:
+                12px;
+        }
+
+
+        .avatar-file-input {
+            display:
+                none;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .app {
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+
+        @media (max-width: 520px) {
+
+            .modal {
+                padding:
+                    12px;
+            }
+
+
+            .modal-content {
+                padding:
+                    18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     MAIN APP
+====================================================== -->
+
+<div class="app">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside class="sidebar">
+
+
+        <!-- PROFILE HEADER -->
+
+        <div class="sidebar-header">
+
+            <div class="current-user">
+
+                <div
+                    id="currentUserAvatar"
+                    class="current-user-avatar"
+                >
+                    👤
+                </div>
+
+
+                <div class="current-user-info">
+
+                    <div
+                        id="currentUserName"
+                        class="current-user-name"
+                    >
+                        کاربر
+                    </div>
+
+
+                    <div
+                        id="currentUserUsername"
+                        class="current-user-username"
+                    >
+                        در حال اتصال...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="profileButton"
+                class="profile-button"
+                type="button"
+                title="پروفایل"
+            >
+                👤
+            </button>
+
+        </div>
+
+
+        <!-- CONNECTION -->
+
+        <div
+            id="connectionStatus"
+            class="connection-status"
+        >
+            در حال اتصال...
+        </div>
+
+
+        <!-- TABS -->
+
+        <div class="mode-tabs">
+
+            <button
+                id="usersTabButton"
+                class="mode-tab active"
+                type="button"
+            >
+                👤 کاربران
+            </button>
+
+
+            <button
+                id="groupsTabButton"
+                class="mode-tab"
+                type="button"
+            >
+                👥 گروه‌ها
+            </button>
+
+
+            <button
+                id="channelsTabButton"
+                class="mode-tab"
+                type="button"
+            >
+                📢 کانال‌ها
+            </button>
+
+        </div>
+
+
+        <!-- USERS -->
+
+        <section
+            id="usersSection"
+            class="mode-section"
+        >
+
+            <div class="users-title">
+                👤 کاربران
+            </div>
+
+
+            <div
+                id="usersList"
+                class="users-list"
+            >
+
+                <div
+                    class="loading-users"
+                >
+                    در حال دریافت کاربران...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- GROUPS -->
+
+        <section
+            id="groupsSection"
+            class="mode-section hidden-section"
+        >
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:8px;
+                    padding:10px;
+                "
+            >
+
+                <div class="users-title">
+                    👥 گروه‌ها
+                </div>
+
+
+                <button
+                    id="createGroupButton"
+                    type="button"
+                    class="btn btn-primary"
+                >
+                    ＋ افزودن گروه
+                </button>
+
+            </div>
+
+
+            <div
+                id="groupsList"
+                class="users-list"
+            >
+
+                <div
+                    class="loading-users"
+                >
+                    در حال دریافت گروه‌ها...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHANNELS -->
+
+        <section
+            id="channelsSection"
+            class="mode-section hidden-section"
+        >
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:8px;
+                    padding:10px;
+                "
+            >
+
+                <div class="users-title">
+                    📢 کانال‌ها
+                </div>
+
+
+                <button
+                    id="createChannelButton"
+                    type="button"
+                    class="btn btn-primary"
+                >
+                    ＋ کانال
+                </button>
+
+            </div>
+
+
+            <div
+                id="channelsList"
+                class="users-list"
+            >
+
+                <div
+                    class="loading-users"
+                >
+                    در حال دریافت کانال‌ها...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- LOGOUT -->
+
+        <button
+            id="logoutButton"
+            type="button"
+            class="btn btn-secondary"
+            style="
+                width:calc(100% - 20px);
+                margin:10px;
+            "
+        >
+            🚪 خروج
+        </button>
+
+    </aside>
+
+
+    <!-- =================================================
+         CHAT AREA
+    ================================================== -->
+
+    <main class="chat-area">
+
+
+        <!-- CHAT HEADER -->
+
+        <header class="chat-header">
+
+
+            <button
+                id="backToUsers"
+                class="back-to-users"
+                type="button"
+                title="بازگشت"
+            >
+                ←
+            </button>
+
+
+            <div
+                id="chatUserAvatar"
+                class="chat-user-avatar"
+            >
+                GAPINO
+            </div>
+
+
+            <div class="chat-user-info">
+
+                <div
+                    id="chatUserName"
+                    class="chat-user-name"
+                >
+                    GAPINO
+                </div>
+
+
+                <div
+                    id="chatUserUsername"
+                    class="chat-user-username"
+                >
+                    یک کاربر را انتخاب کنید.
+                </div>
+
+            </div>
+
+
+            <div class="chat-header-actions">
+
+                <button
+                    id="chatUserProfileButton"
+                    type="button"
+                    title="پروفایل کاربر"
+                >
+                    👤
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- MESSAGES -->
+
+        <div
+            id="messages"
+            class="messages"
+        >
+
+            <div class="empty-chat">
+
+                <div class="empty-chat-icon">
+                    💬
+                </div>
+
+                <h2>
+                    GAPINO
+                </h2>
+
+                <p>
+                    یک کاربر، گروه یا کانال را انتخاب کنید.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- TYPING -->
+
+        <div
+            id="typingIndicator"
+            class="typing-indicator"
+        ></div>
+
+
+        <!-- UPLOAD STATUS -->
+
+        <div
+            id="uploadStatus"
+            style="
+                min-height:22px;
+                padding:0 12px;
+                font-size:13px;
+                color:#64748b;
+            "
+        ></div>
+
+
+        <!-- MESSAGE FORM -->
+
+        <form
+            id="messageForm"
+            class="message-form"
+        >
+
+
+            <button
+                id="attachmentButton"
+                class="attachment-btn"
+                type="button"
+                title="ارسال عکس یا فایل"
+                disabled
+            >
+                📎
+            </button>
+
+
+            <button
+                id="gapinoVoiceButton"
+                type="button"
+                title="پیام صوتی"
+                disabled
+            >
+                🎙️
+            </button>
+
+
+            <span
+                id="gapinoVoiceStatus"
+                class="gapino-voice-status"
+            >
+                ویس
+            </span>
+
+
+            <input
+                id="messageInput"
+                class="message-input"
+                type="text"
+                autocomplete="off"
+                placeholder="یک کاربر را انتخاب کنید..."
+                disabled
+            >
+
+
+            <button
+                id="sendMessageButton"
+                class="send-message-btn"
+                type="submit"
+                title="ارسال پیام"
+            >
+                ➤
+            </button>
+
+
+            <!-- FILE INPUT -->
+
+            <input
+                id="fileInput"
+                type="file"
+                hidden
+            >
+
+        </form>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     PROFILE MODAL
+====================================================== -->
+
+<div
+    id="profileModal"
+    class="modal hidden"
+    hidden
+>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h2>
+                پروفایل
+            </h2>
+
+
+            <button
+                id="closeProfileButton"
+                class="modal-close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="profileLargeAvatar"
+            class="profile-avatar-preview"
+        >
+            👤
+        </div>
+
+
+        <div
+            id="profileName"
+            style="
+                text-align:center;
+                font-weight:900;
+                font-size:19px;
+            "
+        >
+            کاربر
+        </div>
+
+
+        <div
+            id="profileUsername"
+            style="
+                text-align:center;
+                color:#64748b;
+                margin-bottom:18px;
+            "
+        >
+            @user
+        </div>
+
+
+        <form id="profileForm">
+
+
+            <label
+                for="displayNameInput"
+            >
+                نام نمایشی
+            </label>
+
+
+            <input
+                id="displayNameInput"
+                name="display_name"
+                type="text"
+                maxlength="40"
+                placeholder="نام نمایشی"
+                required
+            >
+
+
+            <label
+                for="bioInput"
+            >
+                درباره من
+            </label>
+
+
+            <textarea
+                id="bioInput"
+                name="bio"
+                rows="4"
+                maxlength="160"
+                placeholder="درباره خودت بنویس..."
+            ></textarea>
+
+
+            <!-- =================================================
+                 AVATAR
+            ================================================== -->
+
+            <label>
+                آواتار
+            </label>
+
+
+            <div class="profile-avatar-actions">
+
+                <button
+                    id="chooseAvatarButton"
+                    class="btn btn-primary"
+                    type="button"
+                >
+                    📷 انتخاب عکس
+                </button>
+
+
+                <button
+                    id="removeAvatarButton"
+                    class="btn btn-secondary"
+                    type="button"
+                >
+                    🗑️ حذف عکس
+                </button>
+
+            </div>
+
+
+            <input
+                id="profileAvatarFile"
+                class="avatar-file-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+            >
+
+
+            <div class="profile-avatar-help">
+                عکس را از گوشی یا کامپیوتر انتخاب کن.
+            </div>
+
+
+            <input
+                id="avatarInput"
+                name="avatar"
+                type="hidden"
+                value=""
+            >
+
+
+            <div
+                id="profileMessage"
+                style="
+                    min-height:24px;
+                    text-align:center;
+                "
+            ></div>
+
+
+            <button
+                id="editProfileButton"
+                type="submit"
+            >
+                💾 ذخیره پروفایل
+            </button>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CREATE GROUP MODAL
+====================================================== -->
+
+<div
+    id="groupModal"
+    class="modal hidden"
+    hidden
+>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h2>
+                ساخت گروه
+            </h2>
+
+
+            <button
+                id="closeGroupButton"
+                class="modal-close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="groupForm">
+
+
+            <label
+                for="groupNameInput"
+            >
+                نام گروه
+            </label>
+
+
+            <input
+                id="groupNameInput"
+                name="name"
+                type="text"
+                maxlength="50"
+                placeholder="مثلاً گروه دوستان"
+                required
+            >
+
+
+            <label
+                for="groupDescriptionInput"
+            >
+                توضیحات
+            </label>
+
+
+            <textarea
+                id="groupDescriptionInput"
+                name="description"
+                rows="4"
+                maxlength="300"
+                placeholder="توضیحات گروه..."
+            ></textarea>
+
+
+            <label>
+                آواتار گروه
+            </label>
+
+
+            <button
+                id="chooseGroupAvatarButton"
+                type="button"
+                class="btn btn-secondary"
+            >
+                📷 انتخاب آواتار
+            </button>
+
+
+            <input
+                id="groupAvatarInput"
+                name="avatar"
+                type="hidden"
+                value=""
+            >
+
+
+            <div
+                id="groupFormMessage"
+                style="
+                    min-height:24px;
+                    color:#dc2626;
+                "
+            ></div>
+
+
+            <button
+                type="submit"
+            >
+                👥 ساخت گروه
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CREATE CHANNEL MODAL
+====================================================== -->
+
+<div
+    id="channelModal"
+    class="modal hidden"
+    hidden
+>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h2>
+                ساخت کانال
+            </h2>
+
+
+            <button
+                id="closeChannelButton"
+                class="modal-close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="channelForm">
+
+
+            <label
+                for="channelNameInput"
+            >
+                نام کانال
+            </label>
+
+
+            <input
+                id="channelNameInput"
+                name="name"
+                type="text"
+                maxlength="50"
+                placeholder="مثلاً کانال GAPINO"
+                required
+            >
+
+
+            <label
+                for="channelDescriptionInput"
+            >
+                توضیحات
+            </label>
+
+
+            <textarea
+                id="channelDescriptionInput"
+                name="description"
+                rows="4"
+                maxlength="300"
+                placeholder="توضیحات کانال..."
+            ></textarea>
+
+
+            <label>
+                آواتار کانال
+            </label>
+
+
+            <button
+                id="chooseChannelAvatarButton"
+                type="button"
+                class="btn btn-secondary"
+            >
+                📷 انتخاب آواتار
+            </button>
+
+
+            <input
+                id="channelAvatarInput"
+                name="avatar"
+                type="hidden"
+                value=""
+            >
+
+
+            <div
+                id="channelFormMessage"
+                style="
+                    min-height:24px;
+                    color:#dc2626;
+                "
+            ></div>
+
+
+            <button
+                type="submit"
+            >
+                📢 ساخت کانال
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     OTHER USER PROFILE MODAL
+====================================================== -->
+
+<div
+    id="otherUserProfileModal"
+    class="modal hidden"
+    hidden
+>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h2>
+                پروفایل کاربر
+            </h2>
+
+
+            <button
+                class="modal-close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="otherUserAvatar"
+            class="profile-avatar-preview"
+        >
+            👤
+        </div>
+
+
+        <div
+            id="otherUserName"
+            style="
+                text-align:center;
+                font-weight:900;
+                font-size:19px;
+            "
+        >
+            کاربر
+        </div>
+
+
+        <div
+            id="otherUserUsername"
+            style="
+                text-align:center;
+                color:#64748b;
+                margin-bottom:10px;
+            "
+        >
+            @user
+        </div>
+
+
+        <div
+            id="otherUserStatus"
+            style="
+                text-align:center;
+                color:#16a34a;
+                margin-bottom:8px;
+            "
+        >
+            آفلاین
+        </div>
+
+
+        <div
+            id="otherUserId"
+            style="
+                text-align:center;
+                color:#94a3b8;
+                font-size:11px;
+            "
+        ></div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILE PREVIEW MODAL
+====================================================== -->
+
+<div
+    id="filePreviewModal"
+    class="modal hidden"
+    hidden
+>
+
+
+    <div class="modal-content">
+
+
+        <div class="modal-header">
+
+            <h2>
+                پیش‌نمایش فایل
+            </h2>
+
+
+            <button
+                class="modal-close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="filePreview"
+            class="file-preview"
+        ></div>
+
+
+        <div
+            id="fileName"
+            class="file-preview-name"
+        ></div>
+
+
+        <div
+            id="fileSize"
+            class="file-preview-size"
+        ></div>
+
+
+        <div
+            class="modal-footer"
+        >
+
+            <button
+                id="cancelFile"
+                class="btn btn-secondary"
+                type="button"
+            >
+                انصراف
+            </button>
+
+
+            <button
+                id="sendFile"
+                class="btn btn-primary"
+                type="button"
+            >
+                📤 ارسال
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NOTIFICATION
+====================================================== -->
+
+<div
+    id="messageNotification"
+    class="message-notification"
+    style="display:none;"
+></div>
+
+
+<div
+    id="gapinoToast"
+    class="gapino-toast"
+></div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script
+    src="/chat.js?v=20260831"
+    defer
+></script>
+
+
+</body>
+</html>

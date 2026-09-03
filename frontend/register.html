@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#527bc7"
+    >
+
+    <title>ثبت‌نام | GAPINO</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family:
+                Tahoma,
+                Arial,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #edf4ff,
+                    #dce8ff
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        .register-box {
+            width: 100%;
+
+            max-width: 430px;
+
+            background: #ffffff;
+
+            border-radius: 24px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 20px 60px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.12
+                );
+        }
+
+        .logo {
+            width: 82px;
+
+            height: 82px;
+
+            margin:
+                0 auto 18px;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4f7cff,
+                    #315bdc
+                );
+
+            color: #ffffff;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 29px;
+
+            font-weight: 900;
+
+            box-shadow:
+                0 10px 30px
+                rgba(
+                    49,
+                    91,
+                    220,
+                    0.25
+                );
+        }
+
+        h1 {
+            margin: 0;
+
+            text-align: center;
+
+            color: #1d2940;
+
+            font-size: 26px;
+        }
+
+        .subtitle {
+            margin:
+                10px 0 25px;
+
+            text-align: center;
+
+            color: #778199;
+
+            font-size: 14px;
+
+            line-height: 1.8;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #34415a;
+
+            font-size: 14px;
+
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+
+            height: 52px;
+
+            padding:
+                0 15px;
+
+            border:
+                1px solid #dce2ed;
+
+            border-radius: 14px;
+
+            outline: none;
+
+            background:
+                #f9fbff;
+
+            color:
+                #1d2940;
+
+            font-size: 16px;
+
+            transition:
+                0.2s;
+        }
+
+        input:focus {
+            border-color:
+                #4f7cff;
+
+            background:
+                #ffffff;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(
+                    79,
+                    124,
+                    255,
+                    0.10
+                );
+        }
+
+        .hint {
+            margin-top: 7px;
+
+            color: #8993a7;
+
+            font-size: 12px;
+
+            line-height: 1.8;
+        }
+
+        .submit-button {
+            width: 100%;
+
+            height: 54px;
+
+            border: 0;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4f7cff,
+                    #315bdc
+                );
+
+            color: #ffffff;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition:
+                0.2s;
+        }
+
+        .submit-button:hover {
+            transform:
+                translateY(-1px);
+        }
+
+        .submit-button:active {
+            transform:
+                translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.65;
+
+            cursor: wait;
+
+            transform: none;
+        }
+
+        .message {
+            min-height: 26px;
+
+            margin-top: 14px;
+
+            text-align: center;
+
+            font-size: 14px;
+
+            line-height: 1.8;
+
+            white-space: pre-wrap;
+
+            overflow-wrap: anywhere;
+        }
+
+        .message.error {
+            color:
+                #d33b3b;
+        }
+
+        .message.success {
+            color:
+                #218838;
+        }
+
+        .message.info {
+            color:
+                #52627d;
+        }
+
+        .bottom {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color:
+                #778199;
+
+            font-size: 14px;
+
+            line-height: 1.8;
+        }
+
+        .link-button {
+            border: 0;
+
+            background:
+                transparent;
+
+            color:
+                #315bdc;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            padding:
+                0 4px;
+        }
+
+        .link-button:hover {
+            text-decoration:
+                underline;
+        }
+
+        .back-button {
+            width: 100%;
+
+            height: 48px;
+
+            margin-top: 12px;
+
+            border:
+                1px solid #dce2ed;
+
+            border-radius: 14px;
+
+            background:
+                #f7f9fc;
+
+            color:
+                #47536b;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            transition:
+                0.2s;
+        }
+
+        .back-button:hover {
+            background:
+                #eef2f8;
+        }
+
+        .back-button:active {
+            transform:
+                translateY(1px);
+        }
+
+        @media (max-width: 480px) {
+
+            body {
+                padding: 12px;
+            }
+
+            .register-box {
+                padding: 22px;
+
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<main class="register-box">
+
+    <div class="logo">
+        GAP
+    </div>
+
+    <h1>
+        ساخت حساب GAPINO
+    </h1>
+
+    <div class="subtitle">
+        برای ساخت حساب، نام کاربری و شماره موبایل خود را وارد کنید
+    </div>
+
+    <form
+        id="registerForm"
+        autocomplete="on"
+        novalidate
+    >
+
+        <div class="form-group">
+
+            <label for="username">
+                نام کاربری
+            </label>
+
+            <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                maxlength="30"
+                placeholder="مثلاً Amir123"
+                required
+            >
+
+            <div class="hint">
+                حداقل ۳ کاراکتر، فقط حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط
+            </div>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="phone">
+                شماره موبایل
+            </label>
+
+            <input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                maxlength="13"
+                placeholder="مثلاً 09120000000"
+                required
+            >
+
+            <div class="hint">
+                شماره موبایل را با فرمت 09120000000 وارد کنید.
+            </div>
+
+        </div>
+
+        <button
+            id="registerButton"
+            class="submit-button"
+            type="submit"
+        >
+            ساخت حساب
+        </button>
+
+        <div
+            id="registerMessage"
+            class="message"
+            aria-live="polite"
+        ></div>
+
+    </form>
+
+    <div class="bottom">
+
+        اگه حساب ساخته‌ای و داری؟
+
+        <button
+            id="loginLink"
+            class="link-button"
+            type="button"
+        >
+            ورود به حساب
+        </button>
+
+    </div>
+
+    <button
+        id="backButton"
+        class="back-button"
+        type="button"
+    >
+        بازگشت
+    </button>
+
+</main>
+
+<script>
+
+"use strict";
+
+/* =========================================================
+   API
+========================================================= */
+
+const API = "https://gapino3.onrender.com";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const registerForm =
+    document.getElementById("registerForm");
+
+const usernameInput =
+    document.getElementById("username");
+
+const phoneInput =
+    document.getElementById("phone");
+
+const registerButton =
+    document.getElementById("registerButton");
+
+const registerMessage =
+    document.getElementById("registerMessage");
+
+const loginLink =
+    document.getElementById("loginLink");
+
+const backButton =
+    document.getElementById("backButton");
+
+
+/* =========================================================
+   SAFE TEXT
+========================================================= */
+
+function safeText(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    if (typeof value === "string") {
+        return value;
+    }
+
+    if (
+        typeof value === "number" ||
+        typeof value === "boolean"
+    ) {
+        return String(value);
+    }
+
+    if (Array.isArray(value)) {
+
+        return value
+            .map(item => safeText(item))
+            .filter(Boolean)
+            .join("\n");
+    }
+
+    if (typeof value === "object") {
+
+        if (
+            typeof value.message === "string"
+            && value.message.trim()
+        ) {
+            return value.message;
+        }
+
+        if (
+            typeof value.detail === "string"
+            && value.detail.trim()
+        ) {
+            return value.detail;
+        }
+
+        if (
+            typeof value.error === "string"
+            && value.error.trim()
+        ) {
+            return value.error;
+        }
+
+        try {
+
+            return JSON.stringify(
+                value,
+                null,
+                2
+            );
+
+        } catch (error) {
+
+            return "خطای نامشخص از سرور دریافت شد.";
+        }
+    }
+
+    return String(value);
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+    text,
+    type = "info"
+) {
+
+    if (!registerMessage) {
+        return;
+    }
+
+    registerMessage.textContent =
+        safeText(text);
+
+    registerMessage.className =
+        "message " + type;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function setLoading(
+    loading
+) {
+
+    if (!registerButton) {
+        return;
+    }
+
+    const isLoading =
+        Boolean(loading);
+
+    registerButton.disabled =
+        isLoading;
+
+    registerButton.textContent =
+        isLoading
+            ? "در حال ساخت حساب..."
+            : "ساخت حساب";
+}
+
+
+/* =========================================================
+   NORMALIZE PHONE
+========================================================= */
+
+function normalizePhone(
+    value
+) {
+
+    let phone =
+        String(value || "").trim();
+
+    phone =
+        phone.replace(
+            /[\s\-()]/g,
+            ""
+        );
+
+    if (
+        phone.startsWith("0098")
+    ) {
+
+        phone =
+            "+" +
+            phone.substring(4);
+
+    } else if (
+        phone.startsWith("98")
+    ) {
+
+        phone =
+            "+" +
+            phone;
+
+    } else if (
+        phone.startsWith("09")
+    ) {
+
+        phone =
+            "+98" +
+            phone.substring(1);
+    }
+
+    return phone;
+}
+
+
+/* =========================================================
+   VALIDATE PHONE
+========================================================= */
+
+function isValidIranPhone(
+    phone
+) {
+
+    return /^\+989\d{9}$/.test(
+        phone
+    );
+}
+
+
+/* =========================================================
+   REGISTER USER
+========================================================= */
+
+async function registerUser(
+    username,
+    phone
+) {
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "username",
+        username
+    );
+
+    formData.append(
+        "phone",
+        phone
+    );
+
+    let response;
+
+    try {
+
+        response =
+            await fetch(
+                `${API}/register`,
+                {
+                    method: "POST",
+
+                    body: formData,
+
+                    credentials: "include",
+
+                    cache: "no-store"
+                }
+            );
+
+    } catch (error) {
+
+        console.error(
+            "REGISTER NETWORK ERROR:",
+            error
+        );
+
+        throw new Error(
+            "ارتباط با سرور برقرار نشد. اینترنت یا آدرس سرور را بررسی کنید."
+        );
+    }
+
+
+    let data = null;
+
+    const contentType =
+        response.headers.get(
+            "content-type"
+        ) || "";
+
+
+    if (
+        contentType.includes(
+            "application/json"
+        )
+    ) {
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            console.error(
+                "REGISTER JSON ERROR:",
+                error
+            );
+
+            throw new Error(
+                "پاسخ JSON سرور قابل خواندن نیست."
+            );
+        }
+
+    } else {
+
+        try {
+
+            const text =
+                await response.text();
+
+            data = text;
+
+        } catch (error) {
+
+            data = null;
+        }
+    }
+
+
+    if (
+        !response.ok
+    ) {
+
+        let message = "";
+
+        if (
+            typeof data === "object"
+            && data !== null
+        ) {
+
+            message =
+                data.message ||
+                data.detail ||
+                data.error ||
+                "";
+
+            if (
+                Array.isArray(
+                    data.detail
+                )
+            ) {
+
+                message =
+                    data.detail
+                        .map(item => {
+
+                            if (
+                                item
+                                && typeof item === "object"
+                            ) {
+
+                                return (
+                                    item.msg ||
+                                    item.message ||
+                                    JSON.stringify(item)
+                                );
+                            }
+
+                            return String(item);
+                        })
+                        .join("\n");
+            }
+
+        } else {
+
+            message =
+                safeText(data);
+        }
+
+        if (!message) {
+
+            message =
+                `خطای ثبت‌نام (${response.status})`;
+        }
+
+        throw new Error(
+            safeText(message)
+        );
+    }
+
+
+    if (
+        !data
+        || typeof data !== "object"
+    ) {
+
+        throw new Error(
+            "پاسخ نامعتبر از سرور دریافت شد."
+        );
+    }
+
+
+    if (
+        data.success !== true
+    ) {
+
+        throw new Error(
+            safeText(
+                data.message ||
+                data.detail ||
+                data.error ||
+                "ثبت‌نام انجام نشد."
+            )
+        );
+    }
+
+
+    return data;
+}
+
+
+/* =========================================================
+   HANDLE REGISTER
+========================================================= */
+
+async function handleRegister(
+    event
+) {
+
+    event.preventDefault();
+
+
+    const username =
+        String(
+            usernameInput?.value || ""
+        ).trim();
+
+
+    const phone =
+        normalizePhone(
+            phoneInput?.value
+        );
+
+
+    /* =====================================================
+       USERNAME VALIDATION
+    ===================================================== */
+
+    if (
+        username.length < 3
+    ) {
+
+        showMessage(
+            "نام کاربری باید حداقل ۳ کاراکتر باشد.",
+            "error"
+        );
+
+        usernameInput?.focus();
+
+        return;
+    }
+
+
+    if (
+        username.length > 30
+    ) {
+
+        showMessage(
+            "نام کاربری نباید بیشتر از ۳۰ کاراکتر باشد.",
+            "error"
+        );
+
+        usernameInput?.focus();
+
+        return;
+    }
+
+
+    if (
+        !/^[A-Za-z0-9_.-]+$/.test(
+            username
+        )
+    ) {
+
+        showMessage(
+            "نام کاربری فقط می‌تواند شامل حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط باشد.",
+            "error"
+        );
+
+        usernameInput?.focus();
+
+        return;
+    }
+
+
+    /* =====================================================
+       PHONE VALIDATION
+    ===================================================== */
+
+    if (
+        !isValidIranPhone(
+            phone
+        )
+    ) {
+
+        showMessage(
+            "شماره موبایل معتبر ایران وارد کنید.",
+            "error"
+        );
+
+        phoneInput?.focus();
+
+        return;
+    }
+
+
+    /* =====================================================
+       REGISTER
+    ===================================================== */
+
+    setLoading(true);
+
+    showMessage(
+        "در حال ساخت حساب...",
+        "info"
+    );
+
+
+    try {
+
+        const result =
+            await registerUser(
+                username,
+                phone
+            );
+
+
+        /* =================================================
+           SAVE USER
+        ================================================= */
+
+        if (
+            result
+            && result.user
+        ) {
+
+            try {
+
+                localStorage.setItem(
+                    "gapino_user",
+                    JSON.stringify(
+                        result.user
+                    )
+                );
+
+            } catch (storageError) {
+
+                console.warn(
+                    "LOCAL STORAGE ERROR:",
+                    storageError
+                );
+            }
+        }
+
+
+        /* =================================================
+           SUCCESS
+        ================================================= */
+
+        showMessage(
+            "حساب با موفقیت ساخته شد. در حال انتقال به صفحه ورود...",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.replace(
+                    "login.html"
+                );
+
+            },
+            1000
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "GAPINO REGISTER ERROR:",
+            error
+        );
+
+
+        let message =
+            safeText(
+                error?.message
+            );
+
+
+        if (
+            !message
+        ) {
+
+            message =
+                "ثبت‌نام انجام نشد.";
+        }
+
+
+        showMessage(
+            message,
+            "error"
+        );
+
+
+        setLoading(false);
+    }
+}
+
+
+/* =========================================================
+   PHONE INPUT
+========================================================= */
+
+if (
+    phoneInput
+) {
+
+    phoneInput.addEventListener(
+        "input",
+        () => {
+
+            let value =
+                String(
+                    phoneInput.value || ""
+                );
+
+
+            value =
+                value.replace(
+                    /[^\d+]/g,
+                    ""
+                );
+
+
+            if (
+                value.includes("+")
+            ) {
+
+                value =
+                    value.replace(
+                        /\+/g,
+                        ""
+                    );
+
+                value =
+                    "+" +
+                    value;
+            }
+
+
+            phoneInput.value =
+                value.slice(
+                    0,
+                    13
+                );
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+if (
+    loginLink
+) {
+
+    loginLink.addEventListener(
+        "click",
+        () => {
+
+            window.location.replace(
+                "login.html"
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+if (
+    backButton
+) {
+
+    backButton.addEventListener(
+        "click",
+        () => {
+
+            window.location.replace(
+                "index.html"
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+if (
+    registerForm
+) {
+
+    registerForm.addEventListener(
+        "submit",
+        handleRegister
+    );
+}
+
+</script>
+
+</body>
+
+</html>

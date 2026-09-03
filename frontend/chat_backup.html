@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GAPINO</title>
+
+    <link
+        rel="stylesheet"
+        href="/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="chat-app">
+
+    <!-- =========================================
+         پنل کاربران
+    ========================================== -->
+
+    <aside class="users-panel">
+
+        <div class="users-header">
+
+            <div
+                class="my-profile-button"
+                id="openProfileButton"
+            >
+
+                <div
+                    id="myAvatar"
+                    class="avatar"
+                >
+                    ?
+                </div>
+
+                <div>
+
+                    <div class="logo-small">
+                        GAPINO
+                    </div>
+
+                    <div id="myUsername">
+                        کاربر
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
+                خروج
+            </button>
+
+        </div>
+
+
+        <div class="search-box">
+
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="جستجوی کاربر..."
+            >
+
+        </div>
+
+
+        <div
+            id="usersList"
+            class="users-list"
+        ></div>
+
+    </aside>
+
+
+    <!-- =========================================
+         بخش چت
+    ========================================== -->
+
+    <main class="chat-panel">
+
+        <header class="chat-header">
+
+            <button
+                id="mobileBack"
+                class="mobile-back"
+                type="button"
+            >
+                ←
+            </button>
+
+
+            <div
+                id="chatAvatar"
+                class="avatar"
+            >
+                ?
+            </div>
+
+
+            <div>
+
+                <div id="chatUsername">
+                    یک کاربر را انتخاب کنید
+                </div>
+
+                <div
+                    id="chatStatus"
+                    class="chat-status"
+                ></div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             پیام‌ها
+        ====================================== -->
+
+        <section
+            id="messages"
+            class="messages"
+        >
+
+            <div class="empty-chat">
+                یک کاربر را برای شروع گفتگو انتخاب کنید.
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             در حال تایپ
+        ====================================== -->
+
+        <div
+            id="typingIndicator"
+            class="typing-indicator"
+        ></div>
+
+
+        <!-- =====================================
+             وضعیت آپلود
+        ====================================== -->
+
+        <div
+            id="uploadStatus"
+            class="upload-status"
+        ></div>
+
+
+        <!-- =====================================
+             فرم ارسال
+        ====================================== -->
+
+        <form
+            id="messageForm"
+            class="message-form"
+        >
+
+            <!-- دکمه عکس -->
+
+            <button
+                type="button"
+                id="imageButton"
+                class="attachment-button image-button"
+                title="ارسال عکس"
+            >
+                📷
+            </button>
+
+
+            <!-- انتخاب عکس -->
+
+            <input
+                type="file"
+                id="imageInput"
+                hidden
+                accept="image/*"
+            >
+
+
+            <!-- دکمه فایل -->
+
+            <button
+                type="button"
+                id="attachmentButton"
+                class="attachment-button"
+                title="ارسال فایل"
+            >
+                📎
+            </button>
+
+
+            <!-- انتخاب فایل -->
+
+            <input
+                type="file"
+                id="fileInput"
+                hidden
+                accept="
+                    .pdf,
+                    .txt,
+                    .zip,
+                    .rar,
+                    .doc,
+                    .docx,
+                    .xls,
+                    .xlsx,
+                    .ppt,
+                    .pptx
+                "
+            >
+
+
+            <!-- متن پیام -->
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="پیام خود را بنویسید..."
+                autocomplete="off"
+            >
+
+
+            <!-- ارسال -->
+
+            <button
+                type="submit"
+                class="send-button"
+            >
+                ارسال
+            </button>
+
+        </form>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================
+     پنجره پروفایل
+========================================== -->
+
+<div
+    id="profileModal"
+    class="modal-overlay hidden"
+>
+
+    <div class="profile-modal">
+
+        <div class="modal-header">
+
+            <h2>
+                پروفایل من
+            </h2>
+
+            <button
+                id="closeProfileButton"
+                class="close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="profile-preview">
+
+            <div
+                id="profileAvatarPreview"
+                class="profile-big-avatar"
+            >
+                ?
+            </div>
+
+            <div>
+
+                <div
+                    id="profilePreviewName"
+                    class="profile-preview-name"
+                >
+                    کاربر
+                </div>
+
+                <div
+                    id="profilePreviewUsername"
+                    class="profile-preview-username"
+                >
+                    @username
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <form id="profileForm">
+
+            <label>
+                نام نمایشی
+            </label>
+
+            <input
+                id="displayNameInput"
+                type="text"
+                maxlength="40"
+                placeholder="مثلاً امیر"
+                required
+            >
+
+
+            <label>
+                بیو
+            </label>
+
+            <textarea
+                id="bioInput"
+                maxlength="160"
+                placeholder="درباره خودت بنویس..."
+            ></textarea>
+
+
+            <label>
+                لینک عکس پروفایل
+            </label>
+
+            <input
+                id="avatarInput"
+                type="url"
+                placeholder="https://example.com/avatar.jpg"
+            >
+
+
+            <div
+                id="profileMessage"
+                class="profile-message"
+            ></div>
+
+
+            <button
+                type="submit"
+                class="save-profile-button"
+            >
+                ذخیره پروفایل
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script src="/chat.js"></script>
+
+</body>
+
+</html>

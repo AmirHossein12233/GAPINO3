@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "386738986538",
+    "project_id": "gapino-abb82",
+    "storage_bucket": "gapino-abb82.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386738986538:android:567ad7e2cce90b07c96d53",
+        "android_client_info": {
+          "package_name": "com.gapino.chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcQMtlEsq-VqTMdhSTqD6J4dDG9yH64LQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#527bc7"
+    >
+
+    <meta
+        name="description"
+        content="ورود به GAPINO"
+    >
+
+    <link
+        rel="icon"
+        href="data:,"
+    >
+
+    <title>ورود به GAPINO</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family:
+                Tahoma,
+                Arial,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef4ff,
+                    #f8fafc
+                );
+
+            color: #172033;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .card {
+            background: #ffffff;
+
+            border:
+                1px solid #e3e8f0;
+
+            border-radius: 26px;
+
+            padding: 30px 24px;
+
+            box-shadow:
+                0 25px 80px
+                rgba(15, 23, 42, 0.12);
+        }
+
+        .logo {
+            width: 82px;
+            height: 82px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 22px;
+
+            background: #527bc7;
+
+            color: #ffffff;
+
+            font-size: 32px;
+            font-weight: 900;
+
+            box-shadow:
+                0 12px 30px
+                rgba(82, 123, 199, 0.28);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            margin: 0 0 25px;
+            text-align: center;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        input {
+            width: 100%;
+            min-height: 50px;
+
+            padding: 12px 14px;
+
+            border: 1px solid #dbe2ec;
+            border-radius: 14px;
+
+            outline: none;
+
+            background: #f8fafc;
+            color: #172033;
+
+            font-family: inherit;
+            font-size: 15px;
+
+            direction: ltr;
+            text-align: left;
+        }
+
+        input:focus {
+            border-color: #527bc7;
+            background: #ffffff;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(82, 123, 199, 0.10);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-left: 52px;
+        }
+
+        .toggle-password {
+            position: absolute;
+
+            left: 8px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 38px;
+            height: 38px;
+
+            border: 0;
+            border-radius: 10px;
+
+            background: #eef2f7;
+            color: #475569;
+
+            cursor: pointer;
+
+            font-size: 17px;
+        }
+
+        .submit-button {
+            width: 100%;
+            min-height: 52px;
+
+            margin-top: 8px;
+
+            border: 0;
+            border-radius: 14px;
+
+            background: #527bc7;
+            color: #ffffff;
+
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 900;
+
+            cursor: pointer;
+
+            transition:
+                background 0.15s ease,
+                transform 0.15s ease,
+                opacity 0.15s ease;
+        }
+
+        .submit-button:hover {
+            background: #3f65aa;
+        }
+
+        .submit-button:active {
+            transform: scale(0.985);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        .message {
+            min-height: 28px;
+
+            margin: 13px 0 0;
+
+            text-align: center;
+
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .message.error {
+            color: #dc2626;
+        }
+
+        .message.success {
+            color: #16a34a;
+        }
+
+        .bottom {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #64748b;
+
+            font-size: 13px;
+        }
+
+        .link-button {
+            border: 0;
+            background: transparent;
+
+            color: #527bc7;
+
+            font-family: inherit;
+            font-weight: 900;
+
+            cursor: pointer;
+
+            padding: 2px 4px;
+        }
+
+        .back-button {
+            width: 100%;
+            min-height: 46px;
+
+            margin-top: 10px;
+
+            border: 0;
+            border-radius: 13px;
+
+            background: #eef2f7;
+            color: #172033;
+
+            font-family: inherit;
+            font-weight: 800;
+
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background: #e5ebf3;
+        }
+
+        .loading {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 24px 18px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="page">
+
+    <section class="card">
+
+        <div class="logo">
+            G
+        </div>
+
+        <h1>
+            ورود به GAPINO
+        </h1>
+
+        <p class="subtitle">
+            برای ورود به حساب خود اطلاعاتت را وارد کن.
+        </p>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="username">
+                    نام کاربری
+                </label>
+
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    maxlength="30"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">
+                    رمز عبور
+                </label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="current-password"
+                        maxlength="200"
+                        required
+                    >
+
+                    <button
+                        id="togglePassword"
+                        class="toggle-password"
+                        type="button"
+                        aria-label="نمایش رمز"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                id="loginButton"
+                class="submit-button"
+                type="submit"
+            >
+                ورود
+            </button>
+
+            <div
+                id="loginMessage"
+                class="message"
+                aria-live="polite"
+            ></div>
+
+        </form>
+
+        <div class="bottom">
+
+            حساب نداری؟
+
+            <button
+                id="registerButton"
+                class="link-button"
+                type="button"
+            >
+                ساخت حساب
+            </button>
+
+        </div>
+
+        <button
+            id="backButton"
+            class="back-button"
+            type="button"
+        >
+            بازگشت
+        </button>
+
+    </section>
+
+</main>
+
+<script>
+"use strict";
+
+
+/*
+ * فقط API از Render می‌آید.
+ * صفحه‌ها با مسیرهای محلی خود APK باز می‌شوند.
+ */
+const API = "https://gapino3.onrender.com";
+
+
+const loginForm =
+    document.getElementById("loginForm");
+
+const usernameInput =
+    document.getElementById("username");
+
+const passwordInput =
+    document.getElementById("password");
+
+const loginButton =
+    document.getElementById("loginButton");
+
+const loginMessage =
+    document.getElementById("loginMessage");
+
+const togglePasswordButton =
+    document.getElementById("togglePassword");
+
+const registerButton =
+    document.getElementById("registerButton");
+
+const backButton =
+    document.getElementById("backButton");
+
+
+/*
+ * این تابع فقط برای مسیرهای داخلی خود برنامه است.
+ */
+function localPage(path) {
+    return path;
+}
+
+
+function showMessage(
+    text,
+    type = ""
+) {
+    if (!loginMessage) {
+        return;
+    }
+
+    loginMessage.textContent =
+        String(text || "");
+
+    loginMessage.className =
+        "message";
+
+    if (type) {
+        loginMessage.classList.add(type);
+    }
+}
+
+
+function setLoading(
+    loading
+) {
+    if (!loginButton) {
+        return;
+    }
+
+    loginButton.disabled =
+        Boolean(loading);
+
+    if (loading) {
+        loginButton.textContent =
+            "در حال ورود...";
+
+        loginButton.classList.add(
+            "loading"
+        );
+    } else {
+        loginButton.textContent =
+            "ورود";
+
+        loginButton.classList.remove(
+            "loading"
+        );
+    }
+}
+
+
+/*
+ * خواندن امن JSON
+ */
+async function readJsonResponse(
+    response
+) {
+    const text =
+        await response.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        console.error(
+            "Invalid JSON:",
+            text
+        );
+
+        throw new Error(
+            "پاسخ نامعتبر از سرور دریافت شد."
+        );
+    }
+}
+
+
+/*
+ * LOGIN
+ */
+async function loginUser(
+    username,
+    password
+) {
+    const formData =
+        new FormData();
+
+    formData.append(
+        "username",
+        username
+    );
+
+    formData.append(
+        "password",
+        password
+    );
+
+    let response;
+
+    try {
+        response =
+            await fetch(
+                `${API}/login`,
+                {
+                    method: "POST",
+                    body: formData,
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
+    } catch (error) {
+        console.error(
+            "Login fetch error:",
+            error
+        );
+
+        throw new Error(
+            "ارتباط با سرور برقرار نشد."
+        );
+    }
+
+    const data =
+        await readJsonResponse(
+            response
+        );
+
+    if (!response.ok) {
+        throw new Error(
+            data?.message ||
+            `خطای ورود (${response.status})`
+        );
+    }
+
+    if (
+        !data ||
+        data.success !== true ||
+        !data.user ||
+        !data.user.id
+    ) {
+        console.error(
+            "Unexpected login response:",
+            data
+        );
+
+        throw new Error(
+            "پاسخ نامعتبر از سرور دریافت شد."
+        );
+    }
+
+    return data;
+}
+
+
+/*
+ * بررسی Session
+ */
+async function verifySession() {
+    let response;
+
+    try {
+        response =
+            await fetch(
+                `${API}/me`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-store"
+                }
+            );
+    } catch (error) {
+        console.error(
+            "Session fetch error:",
+            error
+        );
+
+        return null;
+    }
+
+    let data = null;
+
+    try {
+        data =
+            await response.json();
+    } catch (_) {
+        return null;
+    }
+
+    if (
+        !response.ok ||
+        !data ||
+        data.authenticated !== true ||
+        !data.user ||
+        !data.user.id
+    ) {
+        return null;
+    }
+
+    return data.user;
+}
+
+
+/*
+ * SUBMIT
+ */
+async function handleLogin(
+    event
+) {
+    event.preventDefault();
+
+    const username =
+        String(
+            usernameInput?.value || ""
+        ).trim();
+
+    const password =
+        String(
+            passwordInput?.value || ""
+        );
+
+    if (!username) {
+        showMessage(
+            "نام کاربری را وارد کن.",
+            "error"
+        );
+
+        return;
+    }
+
+    if (!password) {
+        showMessage(
+            "رمز عبور را وارد کن.",
+            "error"
+        );
+
+        return;
+    }
+
+    setLoading(true);
+
+    showMessage(
+        "در حال بررسی اطلاعات..."
+    );
+
+    try {
+
+        const data =
+            await loginUser(
+                username,
+                password
+            );
+
+
+        localStorage.setItem(
+            "gapino_user",
+            JSON.stringify(
+                data.user
+            )
+        );
+
+
+        showMessage(
+            "ورود موفق بود. در حال بررسی نشست...",
+            "success"
+        );
+
+
+        const sessionUser =
+            await verifySession();
+
+
+        if (!sessionUser) {
+            localStorage.removeItem(
+                "gapino_user"
+            );
+
+            throw new Error(
+                "ورود انجام شد اما نشست کاربری ثبت نشد."
+            );
+        }
+
+
+        localStorage.setItem(
+            "gapino_user",
+            JSON.stringify(
+                sessionUser
+            )
+        );
+
+
+        showMessage(
+            "ورود موفق بود. در حال ورود...",
+            "success"
+        );
+
+
+        /*
+         * خیلی مهم:
+         * اینجا دیگر به https://gapino3.onrender.com/chat.html
+         * نمی‌رویم.
+         *
+         * مسیر داخلی خود APK باز می‌شود.
+         */
+        window.location.replace(
+            localPage("/chat.html")
+        );
+
+    } catch (error) {
+
+        console.error(
+            "GAPINO login error:",
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "ورود انجام نشد.",
+            "error"
+        );
+
+        setLoading(false);
+    }
+}
+
+
+/*
+ * PASSWORD
+ */
+if (togglePasswordButton) {
+
+    togglePasswordButton.addEventListener(
+        "click",
+        () => {
+
+            if (!passwordInput) {
+                return;
+            }
+
+            const showing =
+                passwordInput.type ===
+                "text";
+
+            passwordInput.type =
+                showing
+                    ? "password"
+                    : "text";
+
+            togglePasswordButton.textContent =
+                showing
+                    ? "👁️"
+                    : "🙈";
+
+        }
+    );
+
+}
+
+
+/*
+ * REGISTER
+ *
+ * حتماً مسیر داخلی باشد.
+ */
+if (registerButton) {
+
+    registerButton.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                localPage("/register.html");
+
+        }
+    );
+
+}
+
+
+/*
+ * BACK
+ */
+if (backButton) {
+
+    backButton.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                localPage("/");
+
+        }
+    );
+
+}
+
+
+/*
+ * بررسی Session قبلی
+ */
+async function checkAlreadyLoggedIn() {
+
+    try {
+
+        const user =
+            await verifySession();
+
+        if (!user) {
+            return;
+        }
+
+        localStorage.setItem(
+            "gapino_user",
+            JSON.stringify(
+                user
+            )
+        );
+
+        showMessage(
+            "شما قبلاً وارد شده‌اید. در حال ورود...",
+            "success"
+        );
+
+        setLoading(true);
+
+        /*
+         * داخل APK
+         */
+        window.location.replace(
+            localPage("/chat.html")
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Existing session check failed:",
+            error
+        );
+
+    }
+}
+
+
+if (loginForm) {
+    loginForm.addEventListener(
+        "submit",
+        handleLogin
+    );
+}
+
+
+checkAlreadyLoggedIn();
+</script>
+
+</body>
+</html>
