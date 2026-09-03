@@ -1,920 +1,983 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
+from fastapi import (
+    FastAPI,
+    Form,
+    File,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+    Request,
+    HTTPException,
+)
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#527bc7"
-    >
-
-    <meta
-        name="description"
-        content="ورود به GAPINO"
-    >
-
-    <link
-        rel="icon"
-        href="data:,"
-    >
-
-    <title>ورود به GAPINO</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            min-height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family:
-                Tahoma,
-                Arial,
-                sans-serif;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #eef4ff,
-                    #f8fafc
-                );
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
 
-            color: #172033;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 20px;
-        }
-
-        .page {
-            width: 100%;
-            max-width: 430px;
-        }
-
-        .card {
-            background: #ffffff;
-
-            border:
-                1px solid #e3e8f0;
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from typing import Dict
 
-            border-radius: 26px;
+import hashlib
+import json
+import os
+import re
+import secrets
+import uuid
+import random
 
-            padding: 30px 24px;
 
-            box-shadow:
-                0 25px 80px
-                rgba(15, 23, 42, 0.12);
-        }
+# =========================
+# PATH
+# =========================
 
-        .logo {
-            width: 82px;
-            height: 82px;
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-            margin: 0 auto 18px;
+FRONTEND_DIR = BASE_DIR / "frontend"
+DATA_DIR = BASE_DIR / "data"
+UPLOAD_DIR = BASE_DIR / "uploads"
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+DATA_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR.mkdir(exist_ok=True)
 
-            border-radius: 22px;
 
-            background: #527bc7;
+USERS_FILE = DATA_DIR / "users.json"
+MESSAGES_FILE = DATA_DIR / "messages.json"
 
-            color: #ffffff;
 
-            font-size: 32px;
-            font-weight: 900;
+for file, default in [
+    (USERS_FILE, []),
+    (MESSAGES_FILE, []),
+]:
 
-            box-shadow:
-                0 12px 30px
-                rgba(82, 123, 199, 0.28);
-        }
+    if not file.exists():
 
-        h1 {
-            margin: 0 0 8px;
-            text-align: center;
-            font-size: 28px;
-        }
+        file.write_text(
+            json.dumps(
+                default,
+                ensure_ascii=False,
+                indent=2
+            ),
+            encoding="utf-8"
+        )
 
-        .subtitle {
-            margin: 0 0 25px;
-            text-align: center;
-            color: #64748b;
-            line-height: 1.8;
-        }
 
-        .form-group {
-            margin-bottom: 15px;
-        }
+# =========================
+# JSON
+# =========================
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 14px;
-            font-weight: 800;
-        }
+def read_json(path):
 
-        input {
-            width: 100%;
-            min-height: 50px;
+    try:
 
-            padding: 12px 14px;
+        return json.loads(
+            path.read_text(
+                encoding="utf-8"
+            )
+        )
 
-            border: 1px solid #dbe2ec;
-            border-radius: 14px;
+    except Exception:
 
-            outline: none;
+        return []
 
-            background: #f8fafc;
-            color: #172033;
 
-            font-family: inherit;
-            font-size: 15px;
 
-            direction: ltr;
-            text-align: left;
-        }
+def save_json(path, data):
 
-        input:focus {
-            border-color: #527bc7;
-            background: #ffffff;
+    path.write_text(
+        json.dumps(
+            data,
+            ensure_ascii=False,
+            indent=2
+        ),
+        encoding="utf-8"
+    )
 
-            box-shadow:
-                0 0 0 4px
-                rgba(82, 123, 199, 0.10);
-        }
 
-        .password-wrapper {
-            position: relative;
-        }
 
-        .password-wrapper input {
-            padding-left: 52px;
-        }
+# =========================
+# TIME
+# =========================
 
-        .toggle-password {
-            position: absolute;
+TEHRAN = timezone(
+    timedelta(
+        hours=3,
+        minutes=30
+    )
+)
 
-            left: 8px;
-            top: 50%;
 
-            transform: translateY(-50%);
 
-            width: 38px;
-            height: 38px;
+def tehran_time():
 
-            border: 0;
-            border-radius: 10px;
+    return datetime.now(
+        timezone.utc
+    ).astimezone(
+        TEHRAN
+    ).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
-            background: #eef2f7;
-            color: #475569;
 
-            cursor: pointer;
 
-            font-size: 17px;
-        }
+# =========================
+# PASSWORD
+# =========================
 
-        .submit-button {
-            width: 100%;
-            min-height: 52px;
+def hash_password(password):
 
-            margin-top: 8px;
+    salt = secrets.token_hex(16)
 
-            border: 0;
-            border-radius: 14px;
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode(),
+        salt.encode(),
+        200000
+    ).hex()
 
-            background: #527bc7;
-            color: #ffffff;
 
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 900;
+    return (
+        "$pbkdf2$"
+        +
+        salt
+        +
+        "$"
+        +
+        digest
+    )
 
-            cursor: pointer;
 
-            transition:
-                background 0.15s ease,
-                transform 0.15s ease,
-                opacity 0.15s ease;
-        }
 
-        .submit-button:hover {
-            background: #3f65aa;
-        }
+def verify_password(password, hashed):
 
-        .submit-button:active {
-            transform: scale(0.985);
-        }
+    try:
 
-        .submit-button:disabled {
-            opacity: 0.65;
-            cursor: wait;
-        }
+        _, _, salt, old = hashed.split("$")
 
-        .message {
-            min-height: 28px;
 
-            margin: 13px 0 0;
+        new = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode(),
+            salt.encode(),
+            200000
+        ).hex()
 
-            text-align: center;
 
-            font-size: 13px;
-            line-height: 1.7;
-        }
+        return secrets.compare_digest(
+            new,
+            old
+        )
 
-        .message.error {
-            color: #dc2626;
-        }
 
-        .message.success {
-            color: #16a34a;
-        }
+    except Exception:
 
-        .bottom {
-            margin-top: 20px;
+        return False
 
-            text-align: center;
 
-            color: #64748b;
 
-            font-size: 13px;
-        }
+# =========================
+# APP
+# =========================
 
-        .link-button {
-            border: 0;
-            background: transparent;
+app = FastAPI(
+    title="GAPINO",
+    version="3.0"
+)
 
-            color: #527bc7;
 
-            font-family: inherit;
-            font-weight: 900;
 
-            cursor: pointer;
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv(
+        "GAPINO_SECRET",
+        "GAPINO_SECRET_CHANGE"
+    ),
+    session_cookie="gapino_session",
+    same_site="lax",
+    https_only=False
+)
 
-            padding: 2px 4px;
-        }
 
-        .back-button {
-            width: 100%;
-            min-height: 46px;
 
-            margin-top: 10px;
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-            border: 0;
-            border-radius: 13px;
 
-            background: #eef2f7;
-            color: #172033;
 
-            font-family: inherit;
-            font-weight: 800;
+# =========================
+# CONNECTIONS
+# =========================
 
-            cursor: pointer;
-        }
+active_connections: Dict[str, WebSocket] = {}
 
-        .back-button:hover {
-            background: #e5ebf3;
-        }
 
-        .loading {
-            opacity: 0.7;
-        }
+# =========================
+# OTP
+# =========================
 
-        @media (max-width: 520px) {
-            body {
-                padding: 12px;
+OTP_CODES = {}
+
+
+def create_otp():
+
+    return str(
+        random.randint(
+            100000,
+            999999
+        )
+    )
+
+
+
+# =========================
+# USERS
+# =========================
+
+def find_user_by_id(user_id):
+
+    users = read_json(
+        USERS_FILE
+    )
+
+    for user in users:
+
+        if user.get("id") == user_id:
+
+            return user
+
+    return None
+
+
+
+def find_user_by_username(username):
+
+    users = read_json(
+        USERS_FILE
+    )
+
+    for user in users:
+
+        if user.get("username") == username:
+
+            return user
+
+    return None
+
+
+
+def find_user_by_mobile(mobile):
+
+    users = read_json(
+        USERS_FILE
+    )
+
+    for user in users:
+
+        if user.get("mobile") == mobile:
+
+            return user
+
+    return None
+
+
+
+def public_user(user):
+
+    return {
+
+        "id": user.get("id"),
+
+        "username": user.get("username"),
+
+        "mobile": user.get("mobile"),
+
+        "avatar": user.get(
+            "avatar",
+            ""
+        ),
+
+        "online":
+            user.get("id")
+            in active_connections
+
+    }
+
+
+
+def current_user(request):
+
+    user_id = request.session.get(
+        "user_id"
+    )
+
+    if not user_id:
+
+        return None
+
+
+    return find_user_by_id(
+        user_id
+    )
+
+
+
+# =========================
+# FRONTEND
+# =========================
+
+@app.get("/")
+async def home():
+
+    return FileResponse(
+        FRONTEND_DIR / "login.html"
+    )
+
+
+
+@app.get("/login.html")
+async def login_page():
+
+    return FileResponse(
+        FRONTEND_DIR / "login.html"
+    )
+
+
+
+@app.get("/register.html")
+async def register_page():
+
+    return FileResponse(
+        FRONTEND_DIR / "register.html"
+    )
+
+
+
+@app.get("/chat.html")
+async def chat_page():
+
+    return FileResponse(
+        FRONTEND_DIR / "chat.html"
+    )
+
+
+
+# =========================
+# HEALTH
+# =========================
+
+@app.get("/health")
+async def health():
+
+    return {
+
+        "status":
+            "GAPINO running",
+
+        "time":
+            tehran_time()
+
+    }
+
+
+
+# =========================
+# REGISTER
+# =========================
+
+@app.post("/register")
+async def register(
+
+    username: str = Form(...),
+
+    mobile: str = Form(...)
+
+):
+
+    username = username.strip()
+
+    mobile = mobile.strip()
+
+
+    users = read_json(
+        USERS_FILE
+    )
+
+
+    for user in users:
+
+        if user.get("username") == username:
+
+            return {
+
+                "ok":False,
+
+                "error":
+                    "نام کاربری وجود دارد"
+
             }
 
-            .card {
-                padding: 24px 18px;
+
+        if user.get("mobile") == mobile:
+
+            return {
+
+                "ok":False,
+
+                "error":
+                    "شماره قبلا ثبت شده"
+
             }
 
-            h1 {
-                font-size: 25px;
-            }
-        }
-    </style>
-</head>
 
-<body>
+    user = {
 
-<main class="page">
+        "id":
+            str(uuid.uuid4()),
 
-    <section class="card">
+        "username":
+            username,
 
-        <div class="logo">
-            G
-        </div>
+        "mobile":
+            mobile,
 
-        <h1>
-            ورود به GAPINO
-        </h1>
+        "password":
+            hash_password(mobile),
 
-        <p class="subtitle">
-            برای ورود به حساب خود اطلاعاتت را وارد کن.
-        </p>
+        "avatar":
+            "",
 
-        <form id="loginForm">
+        "created":
+            tehran_time()
 
-            <div class="form-group">
-
-                <label for="username">
-                    نام کاربری
-                </label>
-
-                <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    autocomplete="username"
-                    autocapitalize="none"
-                    spellcheck="false"
-                    maxlength="30"
-                    required
-                >
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="password">
-                    رمز عبور
-                </label>
-
-                <div class="password-wrapper">
-
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autocomplete="current-password"
-                        maxlength="200"
-                        required
-                    >
-
-                    <button
-                        id="togglePassword"
-                        class="toggle-password"
-                        type="button"
-                        aria-label="نمایش رمز"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button
-                id="loginButton"
-                class="submit-button"
-                type="submit"
-            >
-                ورود
-            </button>
-
-            <div
-                id="loginMessage"
-                class="message"
-                aria-live="polite"
-            ></div>
-
-        </form>
-
-        <div class="bottom">
-
-            حساب نداری؟
-
-            <button
-                id="registerButton"
-                class="link-button"
-                type="button"
-            >
-                ساخت حساب
-            </button>
-
-        </div>
-
-        <button
-            id="backButton"
-            class="back-button"
-            type="button"
-        >
-            بازگشت
-        </button>
-
-    </section>
-
-</main>
-
-<script>
-"use strict";
-
-
-/*
- * فقط API از Render می‌آید.
- * صفحه‌ها با مسیرهای محلی خود APK باز می‌شوند.
- */
-const API = "https://gapino3.onrender.com";
-
-
-const loginForm =
-    document.getElementById("loginForm");
-
-const usernameInput =
-    document.getElementById("username");
-
-const passwordInput =
-    document.getElementById("password");
-
-const loginButton =
-    document.getElementById("loginButton");
-
-const loginMessage =
-    document.getElementById("loginMessage");
-
-const togglePasswordButton =
-    document.getElementById("togglePassword");
-
-const registerButton =
-    document.getElementById("registerButton");
-
-const backButton =
-    document.getElementById("backButton");
-
-
-/*
- * این تابع فقط برای مسیرهای داخلی خود برنامه است.
- */
-function localPage(path) {
-    return path;
-}
-
-
-function showMessage(
-    text,
-    type = ""
-) {
-    if (!loginMessage) {
-        return;
     }
 
-    loginMessage.textContent =
-        String(text || "");
 
-    loginMessage.className =
-        "message";
-
-    if (type) {
-        loginMessage.classList.add(type);
-    }
-}
+    users.append(
+        user
+    )
 
 
-function setLoading(
-    loading
-) {
-    if (!loginButton) {
-        return;
-    }
-
-    loginButton.disabled =
-        Boolean(loading);
-
-    if (loading) {
-        loginButton.textContent =
-            "در حال ورود...";
-
-        loginButton.classList.add(
-            "loading"
-        );
-    } else {
-        loginButton.textContent =
-            "ورود";
-
-        loginButton.classList.remove(
-            "loading"
-        );
-    }
-}
+    save_json(
+        USERS_FILE,
+        users
+    )
 
 
-/*
- * خواندن امن JSON
- */
-async function readJsonResponse(
-    response
-) {
-    const text =
-        await response.text();
+    return {
 
-    if (!text) {
-        return null;
+        "ok":True,
+
+        "user":
+            public_user(user)
+
     }
 
-    try {
-        return JSON.parse(text);
-    } catch (error) {
-        console.error(
-            "Invalid JSON:",
-            text
-        );
-
-        throw new Error(
-            "پاسخ نامعتبر از سرور دریافت شد."
-        );
-    }
-}
 
 
-/*
- * LOGIN
- */
-async function loginUser(
-    username,
-    password
-) {
-    const formData =
-        new FormData();
+# =========================
+# SEND CODE
+# =========================
 
-    formData.append(
-        "username",
+@app.post("/send-code")
+async def send_code(
+    username: str = Form(...)
+):
+
+    username = username.strip()
+
+
+    user = find_user_by_username(
         username
-    );
+    )
 
-    formData.append(
-        "password",
-        password
-    );
 
-    let response;
+    if not user:
 
-    try {
-        response =
-            await fetch(
-                `${API}/login`,
-                {
-                    method: "POST",
-                    body: formData,
-                    credentials: "include",
-                    cache: "no-store"
+        return {
+
+            "ok":False,
+
+            "error":
+                "کاربر پیدا نشد"
+
+        }
+
+
+    code = create_otp()
+
+
+    OTP_CODES[user["id"]] = code
+
+
+    print(
+        "GAPINO OTP:",
+        code
+    )
+
+
+    return {
+
+        "ok":True,
+
+        "message":
+            "کد ارسال شد"
+
+    }
+# =========================
+# VERIFY CODE
+# =========================
+
+@app.post("/verify-code")
+async def verify_code(
+
+    request: Request,
+
+    username: str = Form(...),
+
+    code: str = Form(...)
+
+):
+
+    username = username.strip()
+    code = code.strip()
+
+
+    user = find_user_by_username(
+        username
+    )
+
+
+    if not user:
+
+        return {
+
+            "ok":False,
+
+            "error":
+                "کاربر پیدا نشد"
+
+        }
+
+
+
+    saved_code = OTP_CODES.get(
+        user["id"]
+    )
+
+
+    if not saved_code:
+
+        return {
+
+            "ok":False,
+
+            "error":
+                "ابتدا درخواست کد کنید"
+
+        }
+
+
+
+    if saved_code != code:
+
+        return {
+
+            "ok":False,
+
+            "error":
+                "کد اشتباه است"
+
+        }
+
+
+
+    request.session["user_id"] = user["id"]
+
+
+    OTP_CODES.pop(
+        user["id"],
+        None
+    )
+
+
+    return {
+
+        "ok":True,
+
+        "user":
+            public_user(user)
+
+    }
+
+
+
+# =========================
+# LOGIN OLD
+# =========================
+
+@app.post("/login")
+async def login(
+
+    request: Request,
+
+    mobile: str = Form(...)
+
+):
+
+    mobile = mobile.strip()
+
+
+    user = find_user_by_mobile(
+        mobile
+    )
+
+
+    if not user:
+
+        return {
+
+            "ok":False,
+
+            "error":
+                "حسابی با این شماره وجود ندارد"
+
+        }
+
+
+    request.session["user_id"] = user["id"]
+
+
+    return {
+
+        "ok":True,
+
+        "user":
+            public_user(user)
+
+    }
+
+
+
+# =========================
+# ME
+# =========================
+
+@app.get("/me")
+async def me(
+    request: Request
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        return JSONResponse(
+
+            {
+                "ok":False
+            },
+
+            status_code=401
+
+        )
+
+
+    return {
+
+        "ok":True,
+
+        "user":
+            public_user(user)
+
+    }
+
+
+
+# =========================
+# USERS
+# =========================
+
+@app.get("/users")
+async def users(
+    request: Request
+):
+
+    if not current_user(request):
+
+        raise HTTPException(
+            401
+        )
+
+
+    return [
+
+        public_user(user)
+
+        for user in read_json(
+            USERS_FILE
+        )
+
+    ]
+
+
+
+# =========================
+# MESSAGES
+# =========================
+
+@app.get("/messages/{user_id}")
+async def messages(
+
+    user_id: str,
+
+    request: Request
+
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        raise HTTPException(
+            401
+        )
+
+
+    result = []
+
+
+    for msg in read_json(
+        MESSAGES_FILE
+    ):
+
+        if (
+
+            msg["sender"] == user["id"]
+
+            and
+
+            msg["receiver"] == user_id
+
+        ) or (
+
+            msg["sender"] == user_id
+
+            and
+
+            msg["receiver"] == user["id"]
+
+        ):
+
+            result.append(
+                msg
+            )
+
+
+    return result
+
+
+
+# =========================
+# WEBSOCKET
+# =========================
+
+async def send_to_user(
+
+    user_id,
+
+    data
+
+):
+
+    ws = active_connections.get(
+        user_id
+    )
+
+
+    if ws:
+
+        try:
+
+            await ws.send_json(
+                data
+            )
+
+        except:
+
+            active_connections.pop(
+                user_id,
+                None
+            )
+
+
+
+@app.websocket("/ws/{user_id}")
+async def websocket(
+
+    websocket: WebSocket,
+
+    user_id: str
+
+):
+
+    await websocket.accept()
+
+
+    active_connections[user_id] = websocket
+
+
+    await websocket.send_json(
+
+        {
+            "type":
+                "connected"
+        }
+
+    )
+
+
+    try:
+
+        while True:
+
+            data = await websocket.receive_json()
+
+
+            event = data.get(
+                "type"
+            )
+
+
+            if event == "ping":
+
+                await websocket.send_json(
+
+                    {
+                        "type":
+                            "pong"
+                    }
+
+                )
+
+
+            elif event == "message":
+
+                receiver = data.get(
+                    "receiver"
+                )
+
+
+                text = data.get(
+                    "text",
+                    ""
+                )
+
+
+                msg = {
+
+                    "id":
+                        str(uuid.uuid4()),
+
+                    "sender":
+                        user_id,
+
+                    "receiver":
+                        receiver,
+
+                    "text":
+                        text,
+
+                    "time":
+                        tehran_time()
+
                 }
-            );
-    } catch (error) {
-        console.error(
-            "Login fetch error:",
-            error
-        );
-
-        throw new Error(
-            "ارتباط با سرور برقرار نشد."
-        );
-    }
-
-    const data =
-        await readJsonResponse(
-            response
-        );
-
-    if (!response.ok) {
-        throw new Error(
-            data?.message ||
-            `خطای ورود (${response.status})`
-        );
-    }
-
-    if (
-        !data ||
-        data.success !== true ||
-        !data.user ||
-        !data.user.id
-    ) {
-        console.error(
-            "Unexpected login response:",
-            data
-        );
-
-        throw new Error(
-            "پاسخ نامعتبر از سرور دریافت شد."
-        );
-    }
-
-    return data;
-}
-
-
-/*
- * بررسی Session
- */
-async function verifySession() {
-    let response;
-
-    try {
-        response =
-            await fetch(
-                `${API}/me`,
-                {
-                    method: "GET",
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
-    } catch (error) {
-        console.error(
-            "Session fetch error:",
-            error
-        );
-
-        return null;
-    }
-
-    let data = null;
-
-    try {
-        data =
-            await response.json();
-    } catch (_) {
-        return null;
-    }
-
-    if (
-        !response.ok ||
-        !data ||
-        data.authenticated !== true ||
-        !data.user ||
-        !data.user.id
-    ) {
-        return null;
-    }
-
-    return data.user;
-}
-
-
-/*
- * SUBMIT
- */
-async function handleLogin(
-    event
-) {
-    event.preventDefault();
-
-    const username =
-        String(
-            usernameInput?.value || ""
-        ).trim();
 
-    const password =
-        String(
-            passwordInput?.value || ""
-        );
-
-    if (!username) {
-        showMessage(
-            "نام کاربری را وارد کن.",
-            "error"
-        );
 
-        return;
-    }
+                messages = read_json(
+                    MESSAGES_FILE
+                )
 
-    if (!password) {
-        showMessage(
-            "رمز عبور را وارد کن.",
-            "error"
-        );
 
-        return;
-    }
+                messages.append(
+                    msg
+                )
 
-    setLoading(true);
 
-    showMessage(
-        "در حال بررسی اطلاعات..."
-    );
+                save_json(
+                    MESSAGES_FILE,
+                    messages
+                )
 
-    try {
 
-        const data =
-            await loginUser(
-                username,
-                password
-            );
-
+                await send_to_user(
 
-        localStorage.setItem(
-            "gapino_user",
-            JSON.stringify(
-                data.user
-            )
-        );
+                    receiver,
 
+                    {
 
-        showMessage(
-            "ورود موفق بود. در حال بررسی نشست...",
-            "success"
-        );
+                        "type":
+                            "message",
 
+                        "message":
+                            msg
 
-        const sessionUser =
-            await verifySession();
+                    }
 
+                )
 
-        if (!sessionUser) {
-            localStorage.removeItem(
-                "gapino_user"
-            );
 
-            throw new Error(
-                "ورود انجام شد اما نشست کاربری ثبت نشد."
-            );
-        }
+                await websocket.send_json(
 
+                    {
 
-        localStorage.setItem(
-            "gapino_user",
-            JSON.stringify(
-                sessionUser
-            )
-        );
+                        "type":
+                            "sent",
 
+                        "message":
+                            msg
 
-        showMessage(
-            "ورود موفق بود. در حال ورود...",
-            "success"
-        );
+                    }
 
+                )
 
-        /*
-         * خیلی مهم:
-         * اینجا دیگر به https://gapino3.onrender.com/chat.html
-         * نمی‌رویم.
-         *
-         * مسیر داخلی خود APK باز می‌شود.
-         */
-        window.location.replace(
-            localPage("/chat.html")
-        );
 
-    } catch (error) {
+    except WebSocketDisconnect:
 
-        console.error(
-            "GAPINO login error:",
-            error
-        );
 
-        showMessage(
-            error.message ||
-            "ورود انجام نشد.",
-            "error"
-        );
+        active_connections.pop(
+            user_id,
+            None
+        )
 
-        setLoading(false);
-    }
-}
 
 
-/*
- * PASSWORD
- */
-if (togglePasswordButton) {
+# =========================
+# RUN
+# =========================
 
-    togglePasswordButton.addEventListener(
-        "click",
-        () => {
+if __name__ == "__main__":
 
-            if (!passwordInput) {
-                return;
-            }
+    import uvicorn
 
-            const showing =
-                passwordInput.type ===
-                "text";
 
-            passwordInput.type =
-                showing
-                    ? "password"
-                    : "text";
+    uvicorn.run(
 
-            togglePasswordButton.textContent =
-                showing
-                    ? "👁️"
-                    : "🙈";
+        "main:app",
 
-        }
-    );
+        host="0.0.0.0",
 
-}
+        port=8000,
 
+        reload=True
 
-/*
- * REGISTER
- *
- * حتماً مسیر داخلی باشد.
- */
-if (registerButton) {
-
-    registerButton.addEventListener(
-        "click",
-        () => {
-
-            window.location.href =
-                localPage("/register.html");
-
-        }
-    );
-
-}
-
-
-/*
- * BACK
- */
-if (backButton) {
-
-    backButton.addEventListener(
-        "click",
-        () => {
-
-            window.location.href =
-                localPage("/");
-
-        }
-    );
-
-}
-
-
-/*
- * بررسی Session قبلی
- */
-async function checkAlreadyLoggedIn() {
-
-    try {
-
-        const user =
-            await verifySession();
-
-        if (!user) {
-            return;
-        }
-
-        localStorage.setItem(
-            "gapino_user",
-            JSON.stringify(
-                user
-            )
-        );
-
-        showMessage(
-            "شما قبلاً وارد شده‌اید. در حال ورود...",
-            "success"
-        );
-
-        setLoading(true);
-
-        /*
-         * داخل APK
-         */
-        window.location.replace(
-            localPage("/chat.html")
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Existing session check failed:",
-            error
-        );
-
-    }
-}
-
-
-if (loginForm) {
-    loginForm.addEventListener(
-        "submit",
-        handleLogin
-    );
-}
-
-
-checkAlreadyLoggedIn();
-</script>
-
-</body>
-</html>
+    )
