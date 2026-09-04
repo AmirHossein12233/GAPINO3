@@ -1,426 +1,209 @@
-﻿```css
-* {
-    box-sizing: border-box;
-    font-family: Tahoma, sans-serif;
-}
+﻿```html
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
 
-html,
-body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
+<head>
 
-body {
-    background: #f1f1f1;
-    overflow: hidden;
-}
+    <meta charset="UTF-8">
 
-/* =========================
-   APP
-========================= */
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-.app {
-    width: 100%;
-    height: 100dvh;
-    min-height: 100vh;
+    <title>GAPINO Chat</title>
 
-    display: flex;
-    flex-direction: column;
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="chat.css"
+    >
 
-    overflow: hidden;
-}
+</head>
 
-/* =========================
-   TOP
-========================= */
 
-.top {
-    height: 55px;
-    min-height: 55px;
+<body>
 
-    background: #075e54;
-    color: white;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+<div class="app">
 
-    padding: 0 15px;
 
-    flex-shrink: 0;
-}
+    <!-- =========================
+         HEADER
+    ========================== -->
 
-#menuBtn {
-    background: none;
-    border: none;
+    <header class="top">
 
-    color: white;
+        <div id="profile">
+            GAPINO
+        </div>
 
-    font-size: 25px;
 
-    cursor: pointer;
-}
+        <button
+            id="menuBtn"
+            type="button"
+            aria-label="منوی کاربران"
+        >
+            ☰
+        </button>
 
-/* =========================
-   USERS PANEL
-========================= */
+    </header>
 
-#usersPanel {
-    position: fixed;
 
-    top: 55px;
-    right: 0;
+    <!-- =========================
+         USERS PANEL
+    ========================== -->
 
-    width: 260px;
-    height: calc(100dvh - 55px);
+    <aside id="usersPanel">
 
-    background: white;
+        <h3>
+            کاربران
+        </h3>
 
-    overflow-y: auto;
-    overflow-x: hidden;
+        <div id="usersList">
 
-    border-left: 1px solid #ddd;
+        </div>
 
-    z-index: 1000;
-}
+    </aside>
 
-#usersPanel h3 {
-    padding: 15px;
-    margin: 0;
 
-    border-bottom: 1px solid #eee;
-}
+    <!-- =========================
+         CHAT
+    ========================== -->
 
-.user-item {
-    padding: 12px;
+    <main class="chat">
 
-    border-bottom: 1px solid #eee;
 
-    cursor: pointer;
-}
+        <!-- CHAT HEADER -->
 
-.user-item:hover {
-    background: #f5f5f5;
-}
+        <div id="chatHeader">
 
-/* =========================
-   CHAT
-========================= */
+            انتخاب کاربر
 
-.chat {
-    flex: 1;
+        </div>
 
-    min-height: 0;
 
-    width: 100%;
+        <!-- =========================
+             MESSAGES
+        ========================== -->
 
-    display: flex;
-    flex-direction: column;
+        <div id="messages">
 
-    overflow: hidden;
-}
 
-/* =========================
-   CHAT HEADER
-========================= */
+        </div>
 
-#chatHeader {
-    height: 50px;
-    min-height: 50px;
 
-    background: white;
+        <!-- =========================
+             TYPING INDICATOR
+        ========================== -->
 
-    display: flex;
-    align-items: center;
+        <div
+            id="typingIndicator"
+        >
+            در حال نوشتن...
+        </div>
 
-    padding: 0 15px;
 
-    border-bottom: 1px solid #ddd;
+        <!-- =========================
+             REPLY BOX
+        ========================== -->
 
-    font-weight: bold;
+        <div
+            id="replyBox"
+            style="display:none;"
+        >
 
-    flex-shrink: 0;
-}
+            <span id="replyText">
 
-/* =========================
-   MESSAGES
-========================= */
+            </span>
 
-#messages {
-    flex: 1;
 
-    min-height: 0;
+            <button
+                id="cancelReply"
+                type="button"
+            >
+                ×
+            </button>
 
-    overflow-y: auto;
-    overflow-x: hidden;
+        </div>
 
-    padding: 15px;
 
-    background: #e5ddd5;
+        <!-- =========================
+             INPUT AREA
+        ========================== -->
 
-    -webkit-overflow-scrolling: touch;
-}
+        <div class="inputArea">
 
-/* =========================
-   MESSAGE
-========================= */
 
-.message-item {
-    background: white;
+            <!-- FILE -->
 
-    max-width: 75%;
+            <input
+                type="file"
+                id="fileInput"
+                hidden
+            >
 
-    padding: 10px;
 
-    margin: 8px 0;
+            <!-- MESSAGE INPUT -->
 
-    border-radius: 10px;
+            <input
+                id="messageInput"
+                type="text"
+                autocomplete="off"
+                placeholder="پیام..."
+            >
 
-    position: relative;
 
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-}
+            <!-- PHOTO -->
 
-.message-item img {
-    max-width: 200px;
-    max-height: 300px;
+            <button
+                id="photoBtn"
+                type="button"
+                aria-label="ارسال عکس"
+            >
+                📷
+            </button>
 
-    border-radius: 8px;
 
-    display: block;
-}
+            <!-- VOICE -->
 
-.message-item audio {
-    width: 220px;
-    max-width: 100%;
-}
+            <button
+                id="voiceBtn"
+                type="button"
+                aria-label="ارسال صدا"
+            >
+                🎤
+            </button>
 
-.message-time {
-    font-size: 11px;
 
-    color: #777;
+            <!-- SEND -->
 
-    display: block;
+            <button
+                id="sendBtn"
+                type="button"
+                aria-label="ارسال پیام"
+            >
+                ➤
+            </button>
 
-    margin-top: 5px;
-}
 
-/* =========================
-   REPLY BOX
-========================= */
+        </div>
 
-#replyBox {
-    background: white;
 
-    padding: 8px;
+    </main>
 
-    border-top: 1px solid #ddd;
 
-    display: flex;
+</div>
 
-    justify-content: space-between;
-    align-items: center;
 
-    flex-shrink: 0;
-}
+<!-- =========================
+     JAVASCRIPT
+========================== -->
 
-#replyText {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+<script src="chat.js"></script>
 
-/* =========================
-   INPUT AREA
-========================= */
 
-.inputArea {
-    height: 60px;
-    min-height: 60px;
+</body>
 
-    background: white;
-
-    display: flex;
-    align-items: center;
-
-    padding: 5px;
-
-    gap: 5px;
-
-    flex-shrink: 0;
-}
-
-#messageInput {
-    flex: 1;
-
-    min-width: 0;
-
-    height: 45px;
-
-    border-radius: 25px;
-
-    border: 1px solid #ccc;
-
-    padding: 0 15px;
-
-    outline: none;
-
-    font-size: 15px;
-}
-
-.inputArea button {
-    width: 45px;
-    min-width: 45px;
-
-    height: 45px;
-
-    border-radius: 50%;
-
-    border: none;
-
-    cursor: pointer;
-
-    font-size: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#sendBtn {
-    background: #075e54;
-    color: white;
-}
-
-#voiceBtn {
-    background: #eee;
-}
-
-#photoBtn {
-    background: #eee;
-}
-
-/* =========================
-   TYPING
-========================= */
-
-#typingIndicator {
-    display: none;
-
-    background: white;
-
-    padding: 4px 12px;
-
-    font-size: 11px;
-
-    color: #777;
-
-    flex-shrink: 0;
-}
-
-/* =========================
-   SCROLLBAR
-========================= */
-
-#messages::-webkit-scrollbar,
-#usersPanel::-webkit-scrollbar {
-    width: 6px;
-}
-
-#messages::-webkit-scrollbar-thumb,
-#usersPanel::-webkit-scrollbar-thumb {
-    background: #c7c7c7;
-
-    border-radius: 10px;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 600px) {
-
-    .top {
-        height: 55px;
-        min-height: 55px;
-
-        padding: 0 12px;
-    }
-
-    #usersPanel {
-        width: 80%;
-
-        top: 55px;
-
-        height: calc(100dvh - 55px);
-    }
-
-    #chatHeader {
-        height: 50px;
-        min-height: 50px;
-
-        padding: 0 12px;
-    }
-
-    #messages {
-        padding: 10px;
-    }
-
-    .message-item {
-        max-width: 90%;
-    }
-
-    .message-item img {
-        max-width: 180px;
-    }
-
-    .inputArea {
-        height: 60px;
-        min-height: 60px;
-
-        padding: 5px;
-    }
-
-    #messageInput {
-        height: 45px;
-
-        font-size: 14px;
-
-        padding: 0 12px;
-    }
-
-    .inputArea button {
-        width: 43px;
-        min-width: 43px;
-
-        height: 43px;
-
-        font-size: 18px;
-    }
-}
-
-/* =========================
-   SMALL PHONES
-========================= */
-
-@media (max-width: 380px) {
-
-    #messageInput {
-        padding: 0 10px;
-    }
-
-    .inputArea {
-        gap: 3px;
-    }
-
-    .inputArea button {
-        width: 40px;
-        min-width: 40px;
-
-        height: 40px;
-    }
-}
+</html>
 ```
