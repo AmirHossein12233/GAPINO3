@@ -1,6 +1,6 @@
-﻿const API = "http://localhost:8000";
+﻿const API = "https://gapino3.onrender.com";
 
-const WS = "ws://localhost:8000";
+const WS = "wss://gapino3.onrender.com";
 
 
 
