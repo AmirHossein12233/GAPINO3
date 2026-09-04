@@ -1,240 +1,426 @@
-﻿```html
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+﻿```css
+* {
+    box-sizing: border-box;
+    font-family: Tahoma, sans-serif;
+}
 
-<head>
-    <meta charset="UTF-8">
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+body {
+    background: #f1f1f1;
+    overflow: hidden;
+}
 
-    <title>GAPINO</title>
+/* =========================
+   APP
+========================= */
 
-    <link rel="stylesheet" href="chat.css">
-</head>
+.app {
+    width: 100%;
+    height: 100dvh;
+    min-height: 100vh;
 
-<body>
+    display: flex;
+    flex-direction: column;
 
-<div class="app">
+    overflow: hidden;
+}
 
-    <!-- ================= HEADER ================= -->
+/* =========================
+   TOP
+========================= */
 
-    <header class="top">
+.top {
+    height: 55px;
+    min-height: 55px;
 
-        <div class="top-right">
+    background: #075e54;
+    color: white;
 
-            <button id="menuBtn"
-                    class="icon-btn"
-                    type="button"
-                    aria-label="منو">
-                ☰
-            </button>
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-            <div class="brand">
+    padding: 0 15px;
 
-                <div class="brand-logo">
-                    GAP
-                </div>
+    flex-shrink: 0;
+}
 
-                <div class="brand-text">
-                    <strong>GAPINO</strong>
-                    <span>پیام‌رسان شما</span>
-                </div>
+#menuBtn {
+    background: none;
+    border: none;
 
-            </div>
+    color: white;
 
-        </div>
+    font-size: 25px;
 
-        <div id="profile"
-             class="profile-mini">
-            G
-        </div>
+    cursor: pointer;
+}
 
-    </header>
+/* =========================
+   USERS PANEL
+========================= */
 
+#usersPanel {
+    position: fixed;
 
-    <!-- ================= SIDE PANEL ================= -->
+    top: 55px;
+    right: 0;
 
-    <aside id="usersPanel"
-           class="users-panel">
+    width: 260px;
+    height: calc(100dvh - 55px);
 
-        <div class="users-head">
+    background: white;
 
-            <div>
-                <strong>گفتگوها</strong>
-                <span id="usersCount">کاربران</span>
-            </div>
+    overflow-y: auto;
+    overflow-x: hidden;
 
-            <button id="closeUsersBtn"
-                    class="close-btn"
-                    type="button">
-                ×
-            </button>
+    border-left: 1px solid #ddd;
 
-        </div>
+    z-index: 1000;
+}
 
+#usersPanel h3 {
+    padding: 15px;
+    margin: 0;
 
-        <div class="search-box">
+    border-bottom: 1px solid #eee;
+}
 
-            <span>⌕</span>
+.user-item {
+    padding: 12px;
 
-            <input
-                id="userSearch"
-                type="text"
-                placeholder="جستجوی کاربر...">
+    border-bottom: 1px solid #eee;
 
-        </div>
+    cursor: pointer;
+}
 
+.user-item:hover {
+    background: #f5f5f5;
+}
 
-        <div id="usersList"
-             class="users-list">
-        </div>
+/* =========================
+   CHAT
+========================= */
 
-    </aside>
+.chat {
+    flex: 1;
 
+    min-height: 0;
 
-    <!-- ================= CHAT ================= -->
+    width: 100%;
 
-    <main class="chat">
+    display: flex;
+    flex-direction: column;
 
-        <!-- CHAT HEADER -->
+    overflow: hidden;
+}
 
-        <div id="chatHeader"
-             class="chat-header">
+/* =========================
+   CHAT HEADER
+========================= */
 
-            <div class="chat-user-info">
+#chatHeader {
+    height: 50px;
+    min-height: 50px;
 
-                <div id="chatAvatar"
-                     class="chat-avatar">
-                    ?
-                </div>
+    background: white;
 
-                <div class="chat-user-text">
+    display: flex;
+    align-items: center;
 
-                    <strong id="chatUserName">
-                        انتخاب کاربر
-                    </strong>
+    padding: 0 15px;
 
-                    <span id="chatUserStatus">
-                        برای شروع یک گفتگو انتخاب کنید
-                    </span>
+    border-bottom: 1px solid #ddd;
 
-                </div>
+    font-weight: bold;
 
-            </div>
+    flex-shrink: 0;
+}
 
-        </div>
+/* =========================
+   MESSAGES
+========================= */
 
+#messages {
+    flex: 1;
 
-        <!-- MESSAGES -->
+    min-height: 0;
 
-        <div id="messages"
-             class="messages">
+    overflow-y: auto;
+    overflow-x: hidden;
 
-            <div class="empty-chat">
+    padding: 15px;
 
-                <div class="empty-icon">
-                    GAP
-                </div>
+    background: #e5ddd5;
 
-                <h3>
-                    به GAPINO خوش آمدید
-                </h3>
+    -webkit-overflow-scrolling: touch;
+}
 
-                <p>
-                    یک کاربر را انتخاب کنید تا گفتگو شروع شود.
-                </p>
+/* =========================
+   MESSAGE
+========================= */
 
-            </div>
+.message-item {
+    background: white;
 
-        </div>
+    max-width: 75%;
 
+    padding: 10px;
 
-        <!-- TYPING -->
+    margin: 8px 0;
 
-        <div id="typingIndicator"
-             class="typing-indicator">
-            در حال نوشتن...
-        </div>
+    border-radius: 10px;
 
+    position: relative;
 
-        <!-- REPLY -->
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
 
-        <div id="replyBox"
-             class="reply-box"
-             style="display:none;">
+.message-item img {
+    max-width: 200px;
+    max-height: 300px;
 
-            <div class="reply-content">
+    border-radius: 8px;
 
-                <span class="reply-title">
-                    پاسخ به پیام
-                </span>
+    display: block;
+}
 
-                <span id="replyText"
-                      class="reply-text">
-                </span>
+.message-item audio {
+    width: 220px;
+    max-width: 100%;
+}
 
-            </div>
+.message-time {
+    font-size: 11px;
 
-            <button id="cancelReply"
-                    type="button"
-                    class="reply-close">
-                ×
-            </button>
+    color: #777;
 
-        </div>
+    display: block;
 
+    margin-top: 5px;
+}
 
-        <!-- INPUT -->
+/* =========================
+   REPLY BOX
+========================= */
 
-        <div class="input-area">
+#replyBox {
+    background: white;
 
-            <input
-                type="file"
-                id="fileInput"
-                hidden>
+    padding: 8px;
 
+    border-top: 1px solid #ddd;
 
-            <button id="photoBtn"
-                    type="button"
-                    class="circle-btn">
-                📷
-            </button>
+    display: flex;
 
+    justify-content: space-between;
+    align-items: center;
 
-            <button id="voiceBtn"
-                    type="button"
-                    class="circle-btn">
-                🎤
-            </button>
+    flex-shrink: 0;
+}
 
+#replyText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-            <div class="message-input-wrap">
+/* =========================
+   INPUT AREA
+========================= */
 
-                <input
-                    id="messageInput"
-                    type="text"
-                    autocomplete="off"
-                    placeholder="پیام خود را بنویسید...">
+.inputArea {
+    height: 60px;
+    min-height: 60px;
 
-            </div>
+    background: white;
 
+    display: flex;
+    align-items: center;
 
-            <button id="sendBtn"
-                    type="button"
-                    class="send-btn">
-                ➤
-            </button>
+    padding: 5px;
 
-        </div>
+    gap: 5px;
 
-    </main>
+    flex-shrink: 0;
+}
 
-</div>
+#messageInput {
+    flex: 1;
 
+    min-width: 0;
 
-<script src="chat.js"></script>
+    height: 45px;
 
-</body>
-</html>
+    border-radius: 25px;
+
+    border: 1px solid #ccc;
+
+    padding: 0 15px;
+
+    outline: none;
+
+    font-size: 15px;
+}
+
+.inputArea button {
+    width: 45px;
+    min-width: 45px;
+
+    height: 45px;
+
+    border-radius: 50%;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#sendBtn {
+    background: #075e54;
+    color: white;
+}
+
+#voiceBtn {
+    background: #eee;
+}
+
+#photoBtn {
+    background: #eee;
+}
+
+/* =========================
+   TYPING
+========================= */
+
+#typingIndicator {
+    display: none;
+
+    background: white;
+
+    padding: 4px 12px;
+
+    font-size: 11px;
+
+    color: #777;
+
+    flex-shrink: 0;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+#messages::-webkit-scrollbar,
+#usersPanel::-webkit-scrollbar {
+    width: 6px;
+}
+
+#messages::-webkit-scrollbar-thumb,
+#usersPanel::-webkit-scrollbar-thumb {
+    background: #c7c7c7;
+
+    border-radius: 10px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .top {
+        height: 55px;
+        min-height: 55px;
+
+        padding: 0 12px;
+    }
+
+    #usersPanel {
+        width: 80%;
+
+        top: 55px;
+
+        height: calc(100dvh - 55px);
+    }
+
+    #chatHeader {
+        height: 50px;
+        min-height: 50px;
+
+        padding: 0 12px;
+    }
+
+    #messages {
+        padding: 10px;
+    }
+
+    .message-item {
+        max-width: 90%;
+    }
+
+    .message-item img {
+        max-width: 180px;
+    }
+
+    .inputArea {
+        height: 60px;
+        min-height: 60px;
+
+        padding: 5px;
+    }
+
+    #messageInput {
+        height: 45px;
+
+        font-size: 14px;
+
+        padding: 0 12px;
+    }
+
+    .inputArea button {
+        width: 43px;
+        min-width: 43px;
+
+        height: 43px;
+
+        font-size: 18px;
+    }
+}
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media (max-width: 380px) {
+
+    #messageInput {
+        padding: 0 10px;
+    }
+
+    .inputArea {
+        gap: 3px;
+    }
+
+    .inputArea button {
+        width: 40px;
+        min-width: 40px;
+
+        height: 40px;
+    }
+}
 ```
