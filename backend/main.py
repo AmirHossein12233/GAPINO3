@@ -35,16 +35,36 @@ import re
 import secrets
 import uuid
 import time
+import requests
 
 
+# =========================================================
+# AMOOT SMS SETTINGS
+# =========================================================
 
-# =========================
+# توکن واقعی API پنل آموت را از متغیر محیطی بخوان
+AMOOT_TOKEN = os.getenv("7EEEF5C26FF335152E5F99F5256EADD745A14C90", "7EEEF5C26FF335152E5F99F5256EADD745A14C90")
+
+print("AMOOT TOKEN:", repr(AMOOT_TOKEN))
+
+# سرویس ارسال پیامک عادی
+AMOOT_SEND_SIMPLE_URL = (
+    "https://portal.amootsms.com/rest/SendSimple"
+)
+
+# اگر خواستی خط مشخصی استفاده کنی شماره خط را اینجا بگذار.
+# طبق تنظیمات API آموت می‌توانی Public استفاده کنی.
+AMOOT_LINE_NUMBER = os.getenv(
+    "5000276552234422",
+    "Public"
+)
+
+
+# =========================================================
 # PATH
-# =========================
-
+# =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 FRONTEND_DIR = BASE_DIR / "frontend"
 
@@ -52,17 +72,9 @@ DATA_DIR = BASE_DIR / "data"
 
 UPLOAD_DIR = BASE_DIR / "uploads"
 
+DATA_DIR.mkdir(exist_ok=True)
 
-
-DATA_DIR.mkdir(
-    exist_ok=True
-)
-
-
-UPLOAD_DIR.mkdir(
-    exist_ok=True
-)
-
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 USERS_FILE = DATA_DIR / "users.json"
@@ -72,12 +84,9 @@ MESSAGES_FILE = DATA_DIR / "messages.json"
 CODES_FILE = DATA_DIR / "codes.json"
 
 
-
-
-# =========================
+# =========================================================
 # CREATE FILES
-# =========================
-
+# =========================================================
 
 for file, default in [
 
@@ -104,13 +113,9 @@ for file, default in [
         )
 
 
-
-
-
-# =========================
+# =========================================================
 # JSON HELPERS
-# =========================
-
+# =========================================================
 
 def read_json(path):
 
@@ -124,23 +129,16 @@ def read_json(path):
 
         )
 
-
-    except:
-
+    except Exception:
 
         if path == CODES_FILE:
 
             return {}
 
-
         return []
 
 
-
-
-
 def save_json(path, data):
-
 
     path.write_text(
 
@@ -159,99 +157,284 @@ def save_json(path, data):
     )
 
 
-
-
-
-
-
-# =========================
+# =========================================================
 # TIME
-# =========================
-
+# =========================================================
 
 TEHRAN = timezone(
-
     timedelta(
-
         hours=3,
-
         minutes=30
-
     )
-
 )
-
-
 
 
 def tehran_time():
 
-
     return datetime.now(
-
         timezone.utc
-
     ).astimezone(
-
         TEHRAN
-
     ).strftime(
-
         "%Y-%m-%d %H:%M:%S"
-
     )
 
 
+# =========================================================
+# AMOOT SMS
+# =========================================================
 
-
-
-
-# =========================
-# SMS SENDER
-# =========================
-
-
-def send_sms(
-
-    mobile,
-
-    code
-
+def send_sms_simple(
+    mobile: str,
+    message: str
 ):
 
+    """
+    ارسال پیامک عادی از طریق SendSimple آموت
+    """
 
-    text = (
+    if not AMOOT_TOKEN:
 
-        f"کد ورود GAPINO: {code}"
+        print(
+            "AMOOT_TOKEN is empty"
+        )
 
-    )
+        return {
 
+            "success": False,
 
-    # تستی
-    print("================")
-    print("SMS SENT")
-    print("NUMBER:", mobile)
-    print("MESSAGE:", text)
-    print("================")
+            "message":
+            "توکن آموت تنظیم نشده است",
 
+            "raw": ""
 
-    return True
-
-
+        }
 
 
+    mobile = mobile.strip()
 
 
-# =========================
+    payload = {
+
+        "token":
+        AMOOT_TOKEN,
+
+        "Mobiles":
+        mobile,
+
+        "SendDateTime":
+        "0",
+
+        "SMSMessageText":
+        message,
+
+        "LineNumber":
+        AMOOT_LINE_NUMBER
+
+    }
+
+
+    headers = {
+
+        "Content-Type":
+        "application/x-www-form-urlencoded"
+
+    }
+
+
+    try:
+
+        response = requests.post(
+
+            AMOOT_SEND_SIMPLE_URL,
+
+            data=payload,
+
+            headers=headers,
+
+            timeout=20
+
+        )
+
+
+        print("==============================")
+
+        print("AMOOT SMS RESPONSE")
+
+        print(
+            "HTTP:",
+            response.status_code
+        )
+
+        print(
+            "BODY:",
+            response.text
+        )
+
+        print("==============================")
+
+
+        # توجه:
+        # آموت ممکن است HTTP 200 بدهد ولی نتیجه داخلی ناموفق باشد.
+        # بنابراین فقط به status_code اعتماد نمی‌کنیم.
+
+        raw_text = (
+            response.text
+            if response.text
+            else ""
+        )
+
+
+        if not response.ok:
+
+            return {
+
+                "success":
+                False,
+
+                "message":
+                "ارتباط با سرویس پیامک ناموفق بود",
+
+                "raw":
+                raw_text
+
+            }
+
+
+        # سعی برای خواندن JSON
+        try:
+
+            result = response.json()
+
+        except Exception:
+
+            result = None
+
+
+        # اگر JSON برگشت
+        if isinstance(result, dict):
+
+            # حالت‌های متداول موفقیت
+            success_value = result.get(
+                "success"
+            )
+
+            if success_value is False:
+
+                return {
+
+                    "success":
+                    False,
+
+                    "message":
+                    str(
+                        result.get(
+                            "message",
+                            "ارسال پیامک ناموفق بود"
+                        )
+                    ),
+
+                    "raw":
+                    result
+
+                }
+
+
+            # بعضی پاسخ‌ها result دارند
+            api_result = result.get(
+                "result"
+            )
+
+            if isinstance(
+                api_result,
+                bool
+            ):
+
+                return {
+
+                    "success":
+                    api_result,
+
+                    "message":
+                    str(
+                        result.get(
+                            "message",
+                            "عملیات پیامک"
+                        )
+                    ),
+
+                    "raw":
+                    result
+
+                }
+
+
+            return {
+
+                "success":
+                True,
+
+                "message":
+                str(
+                    result.get(
+                        "message",
+                        "درخواست ارسال شد"
+                    )
+                ),
+
+                "raw":
+                result
+
+            }
+
+
+        # اگر JSON نبود ولی HTTP موفق بود
+        return {
+
+            "success":
+            True,
+
+            "message":
+            "درخواست ارسال پیامک ثبت شد",
+
+            "raw":
+            raw_text
+
+        }
+
+
+    except requests.RequestException as e:
+
+        print(
+            "AMOOT REQUEST ERROR"
+        )
+
+        print(e)
+
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "ارتباط با آموت برقرار نشد",
+
+            "raw":
+            str(e)
+
+        }
+
+
+# =========================================================
 # PASSWORD
-# =========================
+# =========================================================
 
-
-def hash_password(password):
-
+def hash_password(
+    password
+):
 
     salt = secrets.token_hex(16)
-
 
 
     digest = hashlib.pbkdf2_hmac(
@@ -267,38 +450,25 @@ def hash_password(password):
     ).hex()
 
 
-
     return (
-
         "$pbkdf2$"
-
         +
-
         salt
-
         +
-
         "$"
-
         +
-
         digest
-
     )
 
 
-
-
-
-
-def verify_password(password, hashed):
-
+def verify_password(
+    password,
+    hashed
+):
 
     try:
 
-
         _, _, salt, old = hashed.split("$")
-
 
 
         new = hashlib.pbkdf2_hmac(
@@ -314,24 +484,20 @@ def verify_password(password, hashed):
         ).hex()
 
 
-
         return secrets.compare_digest(
-
             new,
-
             old
-
         )
 
 
-    except:
-
+    except Exception:
 
         return False
-# =========================
-# APP
-# =========================
 
+
+# =========================================================
+# APP
+# =========================================================
 
 app = FastAPI(
 
@@ -340,9 +506,6 @@ app = FastAPI(
     version="5.0"
 
 )
-
-
-
 
 
 app.add_middleware(
@@ -366,9 +529,6 @@ app.add_middleware(
 )
 
 
-
-
-
 app.add_middleware(
 
     CORSMiddleware,
@@ -384,121 +544,92 @@ app.add_middleware(
 )
 
 
-
-
-
-# =========================
+# =========================================================
 # WEBSOCKET USERS
-# =========================
-
+# =========================================================
 
 active_connections: Dict[str, WebSocket] = {}
 
 
-
-
-
-# =========================
+# =========================================================
 # USER HELPERS
-# =========================
+# =========================================================
 
-
-def find_user_by_id(user_id):
-
+def find_user_by_mobile(
+    mobile
+):
 
     users = read_json(
-
         USERS_FILE
-
     )
 
 
     for user in users:
-
-
-        if user.get("id") == user_id:
-
-            return user
-
-
-
-    return None
-
-
-
-
-
-def find_user_by_mobile(mobile):
-
-
-    users = read_json(
-
-        USERS_FILE
-
-    )
-
-
-    for user in users:
-
 
         if user.get("mobile") == mobile:
 
             return user
 
 
+    return None
+
+
+def find_user_by_id(
+    user_id
+):
+
+    users = read_json(
+        USERS_FILE
+    )
+
+
+    for user in users:
+
+        if user.get("id") == user_id:
+
+            return user
+
 
     return None
 
 
-
-
-
-
-def public_user(user):
-
+def public_user(
+    user
+):
 
     return {
-
 
         "id":
         user.get("id"),
 
-
         "username":
         user.get("username"),
-
 
         "mobile":
         user.get("mobile"),
 
-
         "avatar":
-        user.get("avatar",""),
-
+        user.get("avatar", ""),
 
         "status":
-        user.get("status",""),
-
+        user.get(
+            "status",
+            ""
+        ),
 
         "online":
         user.get("id")
         in active_connections
 
-
     }
 
 
-
-
-
-
-def current_user(request:Request):
-
+def current_user(
+    request: Request
+):
 
     user_id = request.session.get(
-
         "user_id"
-
     )
 
 
@@ -507,55 +638,63 @@ def current_user(request:Request):
         return None
 
 
-
     return find_user_by_id(
-
         user_id
-
     )
 
 
+# =========================================================
+# HEALTH
+# =========================================================
+
+@app.get("/health")
+async def health():
+
+    return {
+
+        "success":
+        True,
+
+        "server":
+        "GAPINO",
+
+        "time":
+        tehran_time(),
+
+        "sms_configured":
+        bool(AMOOT_TOKEN)
+
+    }
 
 
-
-
-# =========================
+# =========================================================
 # REGISTER
-# =========================
-
+# =========================================================
 
 @app.post("/register")
 async def register(
 
-    username:str = Form(...),
+    username: str = Form(...),
 
-    mobile:str = Form(...)
+    mobile: str = Form(...)
 
 ):
-
 
     username = username.strip()
 
     mobile = mobile.strip()
 
 
-
     if len(username) < 3:
-
 
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
             "نام کاربری کوتاه است"
 
         }
-
-
-
 
 
     if not re.match(
@@ -566,21 +705,14 @@ async def register(
 
     ):
 
-
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
             "نام کاربری نامعتبر است"
 
         }
-
-
-
-
 
 
     if not re.match(
@@ -591,12 +723,9 @@ async def register(
 
     ):
 
-
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
             "شماره موبایل اشتباه است"
@@ -604,31 +733,18 @@ async def register(
         }
 
 
-
-
-
-
     users = read_json(
-
         USERS_FILE
-
     )
-
-
-
 
 
     for user in users:
 
-
-        if user["username"] == username:
-
+        if user.get("username") == username:
 
             return {
 
-
-                "success":False,
-
+                "success": False,
 
                 "message":
                 "نام کاربری وجود دارد"
@@ -636,16 +752,11 @@ async def register(
             }
 
 
-
-
-        if user["mobile"] == mobile:
-
+        if user.get("mobile") == mobile:
 
             return {
 
-
-                "success":False,
-
+                "success": False,
 
                 "message":
                 "شماره قبلا ثبت شده"
@@ -653,45 +764,30 @@ async def register(
             }
 
 
-
-
-
-
     user = {
-
 
         "id":
         str(uuid.uuid4()),
 
-
         "username":
         username,
-
 
         "mobile":
         mobile,
 
-
         "password":
         hash_password(mobile),
-
 
         "avatar":
         "",
 
-
         "status":
         "سلام! من در GAPINO هستم",
-
 
         "created":
         tehran_time()
 
     }
-
-
-
-
 
 
     users.append(user)
@@ -706,14 +802,9 @@ async def register(
     )
 
 
-
-
-
     return {
 
-
-        "success":True,
-
+        "success": True,
 
         "user":
         public_user(user)
@@ -721,27 +812,18 @@ async def register(
     }
 
 
-
-
-
-
-
-
-# =========================
-# SEND OTP
-# =========================
-
+# =========================================================
+# SEND CODE
+# =========================================================
 
 @app.post("/send-code")
 async def send_code(
 
-    mobile:str = Form(...)
+    mobile: str = Form(...)
 
 ):
 
-
     mobile = mobile.strip()
-
 
 
     if not re.match(
@@ -752,106 +834,148 @@ async def send_code(
 
     ):
 
-
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
-            "شماره اشتباه است"
+            "شماره موبایل اشتباه است"
 
         }
 
 
-
-
+    # -----------------------------------------------------
+    # بررسی زمان ارسال قبلی
+    # -----------------------------------------------------
 
     codes = read_json(
-
         CODES_FILE
-
     )
 
 
-
-    old = codes.get(mobile)
-
+    old = codes.get(
+        mobile
+    )
 
 
     if old:
 
-
-        if time.time() - old.get(
+        last_timestamp = old.get(
             "timestamp",
             0
-        ) < 60:
+        )
 
+
+        if time.time() - last_timestamp < 60:
+
+            remaining = int(
+                60 -
+                (
+                    time.time()
+                    -
+                    last_timestamp
+                )
+            )
 
             return {
 
-
-                "success":False,
-
+                "success":
+                False,
 
                 "message":
-                "۶۰ ثانیه صبر کنید"
+                f"لطفاً {remaining} ثانیه صبر کنید"
 
             }
 
 
-
-
-
-
+    # -----------------------------------------------------
+    # تولید کد ۶ رقمی
+    # -----------------------------------------------------
 
     code = str(
 
         secrets.randbelow(900000)
 
-        +
-
-        100000
+        + 100000
 
     )
 
 
+    # -----------------------------------------------------
+    # متن پیامک
+    # -----------------------------------------------------
+
+    sms_text = (
+
+        f"کد اعتبارسنجی GAPINO: {code}"
+
+    )
 
 
+    # -----------------------------------------------------
+    # ارسال به آموت
+    # -----------------------------------------------------
 
-    send_sms(
+    sms_result = send_sms_simple(
 
         mobile,
 
-        code
+        sms_text
 
     )
 
 
+    if not sms_result.get(
+        "success",
+        False
+    ):
+
+        print("==============================")
+
+        print("SMS SEND FAILED")
+
+        print(
+            sms_result
+        )
+
+        print("==============================")
 
 
+        return {
+
+            "success":
+            False,
+
+            "message":
+            sms_result.get(
+                "message",
+                "ارسال پیامک ناموفق بود"
+            ),
+
+            "provider_response":
+            sms_result.get(
+                "raw"
+            )
+
+        }
+
+
+    # -----------------------------------------------------
+    # ذخیره کد
+    # -----------------------------------------------------
 
     codes[mobile] = {
 
-
         "code":
-
         code,
 
-
         "timestamp":
-
         time.time(),
 
-
         "created":
-
         tehran_time()
 
     }
-
-
 
 
     save_json(
@@ -863,107 +987,116 @@ async def send_code(
     )
 
 
-
-
-
-
     return {
 
-
-        "success":True,
-
+        "success":
+        True,
 
         "message":
-        "کد ارسال شد"
+        "کد اعتبارسنجی ارسال شد"
 
     }
 
 
-
-
-
-
-
-
-
-# =========================
-# VERIFY OTP
-# =========================
-
+# =========================================================
+# VERIFY CODE
+# =========================================================
 
 @app.post("/verify-code")
 async def verify_code(
 
-    mobile:str = Form(...),
+    mobile: str = Form(...),
 
-    code:str = Form(...)
+    code: str = Form(...)
 
 ):
 
+    mobile = mobile.strip()
 
-    codes = read_json(
-
-        CODES_FILE
-
-    )
+    code = code.strip()
 
 
+    if not re.match(
 
-    saved = codes.get(
+        r"^09\d{9}$",
 
         mobile
 
+    ):
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "شماره موبایل اشتباه است"
+
+        }
+
+
+    if not re.match(
+
+        r"^\d{6}$",
+
+        code
+
+    ):
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "کد باید ۶ رقمی باشد"
+
+        }
+
+
+    codes = read_json(
+        CODES_FILE
     )
 
 
-
+    saved = codes.get(
+        mobile
+    )
 
 
     if not saved:
 
-
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
-            "کد وجود ندارد"
+            "کدی برای این شماره وجود ندارد"
 
         }
 
 
-
-
-
-    if time.time() - saved["timestamp"] > 300:
-
+    # انقضای کد بعد از ۵ دقیقه
+    if time.time() - saved.get(
+        "timestamp",
+        0
+    ) > 300:
 
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
-            "کد منقضی شده"
+            "کد منقضی شده است"
 
         }
 
 
-
-
-
-
-    if saved["code"] != code:
-
+    if saved.get("code") != code:
 
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
             "کد اشتباه است"
@@ -971,57 +1104,42 @@ async def verify_code(
         }
 
 
-
-
-
-
     return {
 
-
-        "success":True,
-
+        "success": True,
 
         "message":
-        "تایید شد"
+        "کد تایید شد"
 
     }
 
 
-
-
-
-
-# =========================
+# =========================================================
 # LOGIN
-# =========================
-
+# =========================================================
 
 @app.post("/login")
 async def login(
 
-    request:Request,
+    request: Request,
 
-    mobile:str = Form(...)
+    mobile: str = Form(...)
 
 ):
 
+    mobile = mobile.strip()
+
 
     user = find_user_by_mobile(
-
-        mobile.strip()
-
+        mobile
     )
-
 
 
     if not user:
 
-
         return {
 
-
-            "success":False,
-
+            "success": False,
 
             "message":
             "کاربر پیدا نشد"
@@ -1029,21 +1147,12 @@ async def login(
         }
 
 
-
-
-
-
     request.session["user_id"] = user["id"]
-
-
-
 
 
     return {
 
-
-        "success":True,
-
+        "success": True,
 
         "user":
         public_user(user)
@@ -1051,192 +1160,37 @@ async def login(
     }
 
 
-
-
-
-
-# =========================
-# PROFILE
-# =========================
-
-
-@app.post("/profile")
-async def profile(
-
-    request:Request,
-
-    username:str = Form(None),
-
-    status:str = Form(None)
-
-):
-
-
-    user = current_user(request)
-
-
-
-    if not user:
-
-        raise HTTPException(401)
-
-
-
-
-
-    users = read_json(
-
-        USERS_FILE
-
-    )
-
-
-
-    for item in users:
-
-
-        if item["id"] == user["id"]:
-
-
-            if username:
-
-                item["username"] = username.strip()
-
-
-
-            if status:
-
-                item["status"] = status.strip()
-
-
-
-
-
-    save_json(
-
-        USERS_FILE,
-
-        users
-
-    )
-
-
-
-
-
-    return {
-
-
-        "success":True
-
-    }
-# =========================
-# FRONTEND PAGES
-# =========================
-
-
-@app.get("/")
-async def home():
-
-    return FileResponse(
-        FRONTEND_DIR / "login.html"
-    )
-
-
-
-@app.get("/login.html")
-async def login_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "login.html"
-    )
-
-
-
-@app.get("/register.html")
-async def register_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "register.html"
-    )
-
-
-
-@app.get("/chat.html")
-async def chat_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "chat.html"
-    )
-
-
-
-
-
-
-# =========================
-# HEALTH
-# =========================
-
-
-@app.get("/health")
-async def health():
-
-    return {
-
-        "status":
-        "GAPINO running",
-
-        "time":
-        tehran_time()
-
-    }
-
-
-
-
-
-
-
-# =========================
+# =========================================================
 # CURRENT USER
-# =========================
-
+# =========================================================
 
 @app.get("/me")
 async def me(
-    request:Request
+    request: Request
 ):
 
-
-    user=current_user(
+    user = current_user(
         request
     )
 
 
     if not user:
 
+        return {
 
-        return JSONResponse(
+            "success":
+            False,
 
-            {
+            "message":
+            "وارد حساب نشده‌اید"
 
-                "success":False,
-
-                "message":
-                "وارد نشده‌اید"
-
-            },
-
-            status_code=401
-
-        )
-
+        }
 
 
     return {
 
-        "success":True,
+        "success":
+        True,
 
         "user":
         public_user(user)
@@ -1244,268 +1198,493 @@ async def me(
     }
 
 
+# =========================================================
+# LOGOUT
+# =========================================================
+
+@app.post("/logout")
+async def logout(
+    request: Request
+):
+
+    request.session.clear()
 
 
+    return {
+
+        "success":
+        True,
+
+        "message":
+        "خارج شدید"
+
+    }
 
 
-
-# =========================
-# USERS LIST
-# =========================
-
+# =========================================================
+# USERS
+# =========================================================
 
 @app.get("/users")
-async def users(
-    request:Request
-):
+async def users():
 
-
-    if not current_user(request):
-
-        raise HTTPException(401)
-
-
-
-    result=[]
-
-
-    for user in read_json(
+    all_users = read_json(
         USERS_FILE
-    ):
-
-        result.append(
-            public_user(user)
-        )
-
+    )
 
 
     return {
 
-        "success":True,
+        "success":
+        True,
 
         "users":
-        result
+        [
+            public_user(user)
+            for user in all_users
+        ]
 
     }
 
 
+# =========================================================
+# MESSAGES
+# =========================================================
 
-
-
-
-
-
-# =========================
-# UPLOAD IMAGE / VOICE
-# =========================
-
-
-@app.post("/upload")
-async def upload(
-
-    request:Request,
-
-    file:UploadFile = File(...)
-
+@app.get("/messages")
+async def messages(
+    request: Request
 ):
 
-
-    if not current_user(request):
-
-        raise HTTPException(401)
-
-
-
-
-    ext = Path(
-        file.filename
-    ).suffix.lower()
-
-
-
-    allowed = {
-
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".webp",
-        ".gif",
-        ".mp3",
-        ".wav",
-        ".webm",
-        ".ogg"
-
-    }
-
-
-
-
-    if ext not in allowed:
-
-
-        return {
-
-            "success":False,
-
-            "message":
-            "فرمت فایل مجاز نیست"
-
-        }
-
-
-
-
-
-    data = await file.read()
-
-
-
-    if len(data) > 10 * 1024 * 1024:
-
-
-        return {
-
-            "success":False,
-
-            "message":
-            "حجم فایل زیاد است"
-
-        }
-
-
-
-
-
-    filename = (
-
-        str(uuid.uuid4())
-
-        +
-
-        ext
-
+    user = current_user(
+        request
     )
 
 
+    if not user:
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "ابتدا وارد شوید",
+
+            "messages":
+            []
+
+        }
 
 
-    path = UPLOAD_DIR / filename
+    data = read_json(
+        MESSAGES_FILE
+    )
 
 
+    return {
 
-    path.write_bytes(
+        "success":
+        True,
+
+        "messages":
         data
-    )
-
-
-
-
-    return {
-
-        "success":True,
-
-        "url":
-        "/uploads/" + filename
 
     }
 
 
+# =========================================================
+# SEND MESSAGE
+# =========================================================
 
+@app.post("/messages")
+async def send_message(
 
+    request: Request,
 
+    receiver_id: str = Form(...),
 
+    text: str = Form("")
 
-
-@app.get("/uploads/{filename}")
-async def get_upload(
-    filename:str
 ):
 
-
-    path = UPLOAD_DIR / filename
-
-
-
-    if not path.exists():
-
-        raise HTTPException(404)
-
-
-
-    return FileResponse(
-        path
+    user = current_user(
+        request
     )
 
 
+    if not user:
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "ابتدا وارد شوید"
+
+        }
 
 
+    text = text.strip()
 
 
+    if not text:
 
-# =========================
-# MESSAGE MODEL
-# =========================
+        return {
 
+            "success":
+            False,
 
-def create_message(
+            "message":
+            "متن پیام خالی است"
 
-    sender,
-
-    receiver,
-
-    text="",
-
-    file=None,
-
-    file_type=None,
-
-    reply_to=None
-
-):
+        }
 
 
-    return {
+    receiver = find_user_by_id(
+        receiver_id
+    )
 
+
+    if not receiver:
+
+        return {
+
+            "success":
+            False,
+
+            "message":
+            "گیرنده پیدا نشد"
+
+        }
+
+
+    messages_data = read_json(
+        MESSAGES_FILE
+    )
+
+
+    message = {
 
         "id":
         str(uuid.uuid4()),
 
+        "sender_id":
+        user["id"],
 
-        "sender":
-        sender,
-
-
-        "receiver":
-        receiver,
-
+        "receiver_id":
+        receiver_id,
 
         "text":
         text,
 
+        "created":
+        tehran_time()
 
-        "file":
-        file,
-
-
-        "file_type":
-        file_type,
+    }
 
 
-        "reply_to":
-        reply_to,
+    messages_data.append(
+        message
+    )
 
 
-        "edited":
-        False,
+    save_json(
+
+        MESSAGES_FILE,
+
+        messages_data
+
+    )
 
 
-        "deleted":
-        False,
+    # ارسال لحظه‌ای اگر کاربر آنلاین باشد
+    ws = active_connections.get(
+        receiver_id
+    )
 
 
-        "seen":
-        False,
+    if ws:
 
+        try:
+
+            await ws.send_json({
+
+                "type":
+                "message",
+
+                "message":
+                message
+
+            })
+
+        except Exception:
+
+            pass
+
+
+    return {
+
+        "success":
+        True,
+
+        "message":
+        message
+
+    }
+
+
+# =========================================================
+# WEBSOCKET
+# =========================================================
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(
+
+    websocket: WebSocket,
+
+    user_id: str
+
+):
+
+    user = find_user_by_id(
+        user_id
+    )
+
+
+    if not user:
+
+        await websocket.close()
+
+        return
+
+
+    await websocket.accept()
+
+
+    active_connections[user_id] = websocket
+
+
+    try:
+
+        while True:
+
+            data = await websocket.receive_json()
+
+
+            message_type = data.get(
+                "type"
+            )
+
+
+            if message_type == "ping":
+
+                await websocket.send_json({
+
+                    "type":
+                    "pong",
+
+                    "time":
+                    tehran_time()
+
+                })
+
+
+            elif message_type == "typing":
+
+                receiver_id = data.get(
+                    "receiver_id"
+                )
+
+
+                receiver_ws = (
+                    active_connections.get(
+                        receiver_id
+                    )
+                )
+
+
+                if receiver_ws:
+
+                    try:
+
+                        await receiver_ws.send_json({
+
+                            "type":
+                            "typing",
+
+                            "user_id":
+                            user_id
+
+                        })
+
+                    except Exception:
+
+                        pass
+
+
+            elif message_type == "message":
+
+                receiver_id = data.get(
+                    "receiver_id"
+                )
+
+                text = str(
+                    data.get(
+                        "text",
+                        ""
+                    )
+                ).strip()
+
+
+                if not receiver_id or not text:
+
+                    continue
+
+
+                receiver = find_user_by_id(
+                    receiver_id
+                )
+
+
+                if not receiver:
+
+                    continue
+
+
+                messages_data = read_json(
+                    MESSAGES_FILE
+                )
+
+
+                message = {
+
+                    "id":
+                    str(uuid.uuid4()),
+
+                    "sender_id":
+                    user_id,
+
+                    "receiver_id":
+                    receiver_id,
+
+                    "text":
+                    text,
+
+                    "created":
+                    tehran_time()
+
+                }
+
+
+                messages_data.append(
+                    message
+                )
+
+
+                save_json(
+
+                    MESSAGES_FILE,
+
+                    messages_data
+
+                )
+
+
+                receiver_ws = (
+                    active_connections.get(
+                        receiver_id
+                    )
+                )
+
+
+                if receiver_ws:
+
+                    try:
+
+                        await receiver_ws.send_json({
+
+                            "type":
+                            "message",
+
+                            "message":
+                            message
+
+                        })
+
+                    except Exception:
+
+                        pass
+
+
+                await websocket.send_json({
+
+                    "type":
+                    "message_sent",
+
+                    "message":
+                    message
+
+                })
+
+
+    except WebSocketDisconnect:
+
+        pass
+
+
+    except Exception as e:
+
+        print(
+            "WEBSOCKET ERROR:",
+            e
+        )
+
+
+    finally:
+
+        if (
+            active_connections.get(
+                user_id
+            )
+            is websocket
+        ):
+
+            del active_connections[user_id]
+
+
+# =========================================================
+# ONLINE USERS
+# =========================================================
+
+@app.get("/online-users")
+async def online_users():
+
+    return {
+
+        "success":
+        True,
+
+        "users":
+        list(
+            active_connections.keys()
+        )
+
+    }
+
+
+# =========================================================
+# TIME
+# =========================================================
+
+@app.get("/time")
+async def get_time():
+
+    return {
+
+        "success":
+        True,
 
         "time":
         tehran_time()
@@ -1513,144 +1692,168 @@ def create_message(
     }
 
 
+# =========================================================
+# FRONTEND
+# =========================================================
 
+@app.get("/")
+async def root():
 
-
-
-
-# =========================
-# CHAT HISTORY
-# =========================
-
-
-@app.get("/messages/{user_id}")
-async def get_messages(
-
-    user_id:str,
-
-    request:Request
-
-):
-
-
-    user=current_user(
-        request
+    index_file = (
+        FRONTEND_DIR /
+        "index.html"
     )
 
 
+    if index_file.exists():
 
-    if not user:
-
-        raise HTTPException(401)
-
-
-
-
-    result=[]
-
-
-
-    messages = read_json(
-        MESSAGES_FILE
-    )
-
-
-
-
-    for msg in messages:
-
-
-        if (
-
-            msg["sender"] == user["id"]
-
-            and
-
-            msg["receiver"] == user_id
-
-        ) or (
-
-            msg["sender"] == user_id
-
-            and
-
-            msg["receiver"] == user["id"]
-
-        ):
-
-
-            result.append(msg)
-
-
+        return FileResponse(
+            index_file
+        )
 
 
     return {
 
-        "success":True,
+        "success":
+        True,
 
-        "messages":
-        result
+        "app":
+        "GAPINO",
+
+        "message":
+        "GAPINO server is running"
 
     }
 
 
+# =========================================================
+# CHAT HTML
+# =========================================================
 
+@app.get("/chat.html")
+async def chat_html():
 
-
-
-# =========================
-# LAST MESSAGES
-# =========================
-
-
-@app.get("/last-messages")
-async def last_messages(
-
-    request:Request
-
-):
-
-
-    user=current_user(
-        request
+    file = (
+        FRONTEND_DIR /
+        "chat.html"
     )
 
 
-    if not user:
+    if file.exists():
 
-        raise HTTPException(401)
-
-
-
-
-    result={}
+        return FileResponse(
+            file
+        )
 
 
-
-    for msg in read_json(
-        MESSAGES_FILE
-    ):
-
-
-        if msg["sender"] == user["id"]:
-
-            result[msg["receiver"]] = msg
+    raise HTTPException(
+        status_code=404,
+        detail="chat.html not found"
+    )
 
 
-        elif msg["receiver"] == user["id"]:
+# =========================================================
+# LOGIN HTML
+# =========================================================
 
-            result[msg["sender"]] = msg
+@app.get("/login.html")
+async def login_html():
+
+    file = (
+        FRONTEND_DIR /
+        "login.html"
+    )
 
 
+    if file.exists():
+
+        return FileResponse(
+            file
+        )
 
 
-    return result
-def tehran_time():
+    raise HTTPException(
+        status_code=404,
+        detail="login.html not found"
+    )
 
-    return datetime.now(
-        timezone.utc
-    ).astimezone(
-        TEHRAN
-    ).strftime(
-        "%Y-%m-%d %H:%M:%S"
+
+# =========================================================
+# REGISTER HTML
+# =========================================================
+
+@app.get("/register.html")
+async def register_html():
+
+    file = (
+        FRONTEND_DIR /
+        "register.html"
+    )
+
+
+    if file.exists():
+
+        return FileResponse(
+            file
+        )
+
+
+    raise HTTPException(
+        status_code=404,
+        detail="register.html not found"
+    )
+
+
+# =========================================================
+# FRONTEND STATIC FILES
+# =========================================================
+
+@app.get("/frontend/{file_name:path}")
+async def frontend_file(
+    file_name: str
+):
+
+    file = (
+        FRONTEND_DIR /
+        file_name
+    )
+
+
+    if not file.exists():
+
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+
+    return FileResponse(
+        file
+    )
+
+
+# =========================================================
+# RUN DIRECTLY
+# =========================================================
+
+if __name__ == "__main__":
+
+    import uvicorn
+
+
+    uvicorn.run(
+
+        "main:app",
+
+        host="0.0.0.0",
+
+        port=int(
+            os.getenv(
+                "PORT",
+                "8000"
+            )
+        ),
+
+        reload=False
+
     )

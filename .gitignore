@@ -1,11 +1,16 @@
 venv/
-node_modules/
 __pycache__/
 *.pyc
+
+data/
+uploads/
+
 .env
 
-data/users.json
-data/messages.json
-data/otp.json
-data/unread.json
-data/uploads/
+*.jks
+*.keystore
+
+.idea/
+.vscode/
+
+.DS_Store
