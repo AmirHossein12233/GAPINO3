@@ -43,9 +43,9 @@ import requests
 # =========================================================
 
 # توکن واقعی API پنل آموت را از متغیر محیطی بخوان
-AMOOT_TOKEN = os.getenv("7EEEF5C26FF335152E5F99F5256EADD745A14C90", "7EEEF5C26FF335152E5F99F5256EADD745A14C90")
+AMOOT_TOKEN = os.getenv("AFE30A8E14E5761337C207F6CDCF48627F84FC94", "AFE30A8E14E5761337C207F6CDCF48627F84FC94")
 
-print("AMOOT TOKEN:", repr(AMOOT_TOKEN))
+AMOOT_TOKEN = os.getenv("AMOOT_TOKEN", "")
 
 # سرویس ارسال پیامک عادی
 AMOOT_SEND_SIMPLE_URL = (
