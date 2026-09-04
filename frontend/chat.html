@@ -1,177 +1,240 @@
-﻿<!DOCTYPE html>
+﻿```html
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+    <title>GAPINO</title>
 
-<title>GAPINO Chat</title>
-
-<link rel="stylesheet" href="chat.css">
-
+    <link rel="stylesheet" href="chat.css">
 </head>
-
 
 <body>
 
-
 <div class="app">
 
-
-    <!-- HEADER -->
+    <!-- ================= HEADER ================= -->
 
     <header class="top">
 
-        <div id="profile">
-            GAPINO
+        <div class="top-right">
+
+            <button id="menuBtn"
+                    class="icon-btn"
+                    type="button"
+                    aria-label="منو">
+                ☰
+            </button>
+
+            <div class="brand">
+
+                <div class="brand-logo">
+                    GAP
+                </div>
+
+                <div class="brand-text">
+                    <strong>GAPINO</strong>
+                    <span>پیام‌رسان شما</span>
+                </div>
+
+            </div>
+
         </div>
 
-        <button id="menuBtn">
-            ☰
-        </button>
+        <div id="profile"
+             class="profile-mini">
+            G
+        </div>
 
     </header>
 
 
+    <!-- ================= SIDE PANEL ================= -->
 
+    <aside id="usersPanel"
+           class="users-panel">
 
+        <div class="users-head">
 
-    <!-- USERS -->
+            <div>
+                <strong>گفتگوها</strong>
+                <span id="usersCount">کاربران</span>
+            </div>
 
-    <aside id="usersPanel">
-
-
-        <h3>
-            کاربران
-        </h3>
-
-
-        <div id="usersList">
+            <button id="closeUsersBtn"
+                    class="close-btn"
+                    type="button">
+                ×
+            </button>
 
         </div>
 
+
+        <div class="search-box">
+
+            <span>⌕</span>
+
+            <input
+                id="userSearch"
+                type="text"
+                placeholder="جستجوی کاربر...">
+
+        </div>
+
+
+        <div id="usersList"
+             class="users-list">
+        </div>
 
     </aside>
 
 
-
-
-
-
-    <!-- CHAT -->
+    <!-- ================= CHAT ================= -->
 
     <main class="chat">
 
+        <!-- CHAT HEADER -->
 
-        <div id="chatHeader">
+        <div id="chatHeader"
+             class="chat-header">
 
-            انتخاب کاربر
+            <div class="chat-user-info">
+
+                <div id="chatAvatar"
+                     class="chat-avatar">
+                    ?
+                </div>
+
+                <div class="chat-user-text">
+
+                    <strong id="chatUserName">
+                        انتخاب کاربر
+                    </strong>
+
+                    <span id="chatUserStatus">
+                        برای شروع یک گفتگو انتخاب کنید
+                    </span>
+
+                </div>
+
+            </div>
 
         </div>
 
 
+        <!-- MESSAGES -->
 
+        <div id="messages"
+             class="messages">
 
-        <div id="messages">
+            <div class="empty-chat">
 
+                <div class="empty-icon">
+                    GAP
+                </div>
+
+                <h3>
+                    به GAPINO خوش آمدید
+                </h3>
+
+                <p>
+                    یک کاربر را انتخاب کنید تا گفتگو شروع شود.
+                </p>
+
+            </div>
 
         </div>
 
 
+        <!-- TYPING -->
+
+        <div id="typingIndicator"
+             class="typing-indicator">
+            در حال نوشتن...
+        </div>
 
 
-
-
-        <!-- REPLY BOX -->
+        <!-- REPLY -->
 
         <div id="replyBox"
-        style="display:none;">
+             class="reply-box"
+             style="display:none;">
 
+            <div class="reply-content">
 
-            <span id="replyText">
+                <span class="reply-title">
+                    پاسخ به پیام
+                </span>
 
-            </span>
+                <span id="replyText"
+                      class="reply-text">
+                </span>
 
+            </div>
 
-            <button id="cancelReply">
-
+            <button id="cancelReply"
+                    type="button"
+                    class="reply-close">
                 ×
-
             </button>
 
-
         </div>
-
-
-
-
-
 
 
         <!-- INPUT -->
 
-        <div class="inputArea">
-
-
-            <input
-            id="messageInput"
-            placeholder="پیام..." />
-
-
+        <div class="input-area">
 
             <input
-            type="file"
-            id="fileInput"
-            hidden>
+                type="file"
+                id="fileInput"
+                hidden>
 
 
-
-            <button id="photoBtn">
-
+            <button id="photoBtn"
+                    type="button"
+                    class="circle-btn">
                 📷
-
             </button>
 
 
-
-
-
-            <button id="voiceBtn">
-
+            <button id="voiceBtn"
+                    type="button"
+                    class="circle-btn">
                 🎤
-
             </button>
 
 
+            <div class="message-input-wrap">
+
+                <input
+                    id="messageInput"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="پیام خود را بنویسید...">
+
+            </div>
 
 
-
-            <button id="sendBtn">
-
+            <button id="sendBtn"
+                    type="button"
+                    class="send-btn">
                 ➤
-
             </button>
-
 
         </div>
 
-
-
     </main>
-
 
 </div>
 
 
-
-
-
 <script src="chat.js"></script>
 
-
 </body>
-
 </html>
+```
