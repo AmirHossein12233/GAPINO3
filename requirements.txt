@@ -1,5 +1,5 @@
 fastapi
 uvicorn[standard]
+requests
 python-multipart
 itsdangerous
-pwdlib[argon2]
