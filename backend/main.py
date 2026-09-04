@@ -6,14 +6,14 @@
     WebSocket,
     WebSocketDisconnect,
     Request,
-    HTTPException
+    HTTPException,
 )
 
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.responses import (
     FileResponse,
-    JSONResponse
+    JSONResponse,
 )
 
 from starlette.middleware.sessions import SessionMiddleware
@@ -23,7 +23,7 @@ from pathlib import Path
 from datetime import (
     datetime,
     timezone,
-    timedelta
+    timedelta,
 )
 
 from typing import Dict
@@ -35,6 +35,7 @@ import re
 import secrets
 import uuid
 import time
+
 import requests
 
 
@@ -42,21 +43,18 @@ import requests
 # AMOOT SMS SETTINGS
 # =========================================================
 
-# توکن واقعی API پنل آموت را از متغیر محیطی بخوان
-AMOOT_TOKEN = os.getenv("AFE30A8E14E5761337C207F6CDCF48627F84FC94", "AFE30A8E14E5761337C207F6CDCF48627F84FC94")
+AMOOT_TOKEN = os.getenv(
+    "AMOOT_TOKEN",
+    "1F6E30ACE8511ADC9E80C1260AF9D299A37CC76A",
+)
 
-AMOOT_TOKEN = os.getenv("AMOOT_TOKEN", "")
-
-# سرویس ارسال پیامک عادی
 AMOOT_SEND_SIMPLE_URL = (
     "https://portal.amootsms.com/rest/SendSimple"
 )
 
-# اگر خواستی خط مشخصی استفاده کنی شماره خط را اینجا بگذار.
-# طبق تنظیمات API آموت می‌توانی Public استفاده کنی.
 AMOOT_LINE_NUMBER = os.getenv(
-    "5000276552234422",
-    "Public"
+    "AMOOT_LINE_NUMBER",
+    "Public",
 )
 
 
@@ -72,9 +70,14 @@ DATA_DIR = BASE_DIR / "data"
 
 UPLOAD_DIR = BASE_DIR / "uploads"
 
-DATA_DIR.mkdir(exist_ok=True)
 
-UPLOAD_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(
+    exist_ok=True
+)
+
+UPLOAD_DIR.mkdir(
+    exist_ok=True
+)
 
 
 USERS_FILE = DATA_DIR / "users.json"
@@ -94,22 +97,19 @@ for file, default in [
 
     (MESSAGES_FILE, []),
 
-    (CODES_FILE, {})
+    (CODES_FILE, {}),
 
 ]:
 
     if not file.exists():
 
         file.write_text(
-
             json.dumps(
                 default,
                 ensure_ascii=False,
-                indent=2
+                indent=2,
             ),
-
-            encoding="utf-8"
-
+            encoding="utf-8",
         )
 
 
@@ -122,17 +122,14 @@ def read_json(path):
     try:
 
         return json.loads(
-
             path.read_text(
                 encoding="utf-8"
             )
-
         )
 
     except Exception:
 
         if path == CODES_FILE:
-
             return {}
 
         return []
@@ -141,19 +138,12 @@ def read_json(path):
 def save_json(path, data):
 
     path.write_text(
-
         json.dumps(
-
             data,
-
             ensure_ascii=False,
-
-            indent=2
-
+            indent=2,
         ),
-
-        encoding="utf-8"
-
+        encoding="utf-8",
     )
 
 
@@ -164,7 +154,7 @@ def save_json(path, data):
 TEHRAN = timezone(
     timedelta(
         hours=3,
-        minutes=30
+        minutes=30,
     )
 )
 
@@ -186,59 +176,54 @@ def tehran_time():
 
 def send_sms_simple(
     mobile: str,
-    message: str
+    message: str,
 ):
-
     """
-    ارسال پیامک عادی از طریق SendSimple آموت
+    ارسال پیامک عادی از طریق SendSimple آموت.
     """
 
     if not AMOOT_TOKEN:
 
-        print(
-            "AMOOT_TOKEN is empty"
-        )
-
         return {
-
             "success": False,
-
-            "message":
-            "توکن آموت تنظیم نشده است",
-
-            "raw": ""
-
+            "message": "توکن آموت تنظیم نشده است",
+            "raw": "",
         }
 
 
     mobile = mobile.strip()
 
 
-    payload = {
-
-        "token":
-        AMOOT_TOKEN,
-
-        "Mobiles":
+    if not re.match(
+        r"^09\d{9}$",
         mobile,
+    ):
 
-        "SendDateTime":
-        "0",
+        return {
+            "success": False,
+            "message": "شماره موبایل نامعتبر است",
+            "raw": "",
+        }
 
-        "SMSMessageText":
-        message,
 
-        "LineNumber":
-        AMOOT_LINE_NUMBER
+    payload = {
+        "token": AMOOT_TOKEN,
 
+        "Mobiles": mobile,
+
+        # ارسال فوری
+        # عمداً خالی است تا وارد زمان‌بندی نشود
+        "SendDateTime": "",
+
+        "SMSMessageText": message,
+
+        "LineNumber": AMOOT_LINE_NUMBER,
     }
 
 
     headers = {
-
         "Content-Type":
-        "application/x-www-form-urlencoded"
-
+        "application/x-www-form-urlencoded",
     }
 
 
@@ -252,31 +237,10 @@ def send_sms_simple(
 
             headers=headers,
 
-            timeout=20
+            timeout=20,
 
         )
 
-
-        print("==============================")
-
-        print("AMOOT SMS RESPONSE")
-
-        print(
-            "HTTP:",
-            response.status_code
-        )
-
-        print(
-            "BODY:",
-            response.text
-        )
-
-        print("==============================")
-
-
-        # توجه:
-        # آموت ممکن است HTTP 200 بدهد ولی نتیجه داخلی ناموفق باشد.
-        # بنابراین فقط به status_code اعتماد نمی‌کنیم.
 
         raw_text = (
             response.text
@@ -285,23 +249,30 @@ def send_sms_simple(
         )
 
 
+        print("==============================")
+        print("AMOOT SMS RESPONSE")
+        print(
+            "HTTP:",
+            response.status_code,
+        )
+        print(
+            "BODY:",
+            raw_text,
+        )
+        print("==============================")
+
+
         if not response.ok:
 
             return {
-
-                "success":
-                False,
-
+                "success": False,
                 "message":
-                "ارتباط با سرویس پیامک ناموفق بود",
-
+                    "ارتباط با سرویس پیامک ناموفق بود",
                 "raw":
-                raw_text
-
+                    raw_text,
             }
 
 
-        # سعی برای خواندن JSON
         try:
 
             result = response.json()
@@ -311,118 +282,70 @@ def send_sms_simple(
             result = None
 
 
-        # اگر JSON برگشت
-        if isinstance(result, dict):
+        if isinstance(
+            result,
+            dict,
+        ):
 
-            # حالت‌های متداول موفقیت
-            success_value = result.get(
-                "success"
-            )
+            status = str(
+                result.get(
+                    "Status",
+                    "",
+                )
+            ).strip().lower()
 
-            if success_value is False:
+
+            if status == "success":
 
                 return {
-
-                    "success":
-                    False,
-
+                    "success": True,
                     "message":
-                    str(
-                        result.get(
-                            "message",
-                            "ارسال پیامک ناموفق بود"
-                        )
-                    ),
-
+                        "پیامک با موفقیت ارسال شد",
                     "raw":
-                    result
-
+                        result,
                 }
 
 
-            # بعضی پاسخ‌ها result دارند
-            api_result = result.get(
-                "result"
+            # خطاهای آموت را برگردان
+            error_text = (
+                result.get("Status")
+                or result.get("MessageText")
+                or "ارسال پیامک ناموفق بود"
             )
-
-            if isinstance(
-                api_result,
-                bool
-            ):
-
-                return {
-
-                    "success":
-                    api_result,
-
-                    "message":
-                    str(
-                        result.get(
-                            "message",
-                            "عملیات پیامک"
-                        )
-                    ),
-
-                    "raw":
-                    result
-
-                }
 
 
             return {
-
-                "success":
-                True,
-
+                "success": False,
                 "message":
-                str(
-                    result.get(
-                        "message",
-                        "درخواست ارسال شد"
-                    )
-                ),
-
+                    str(error_text),
                 "raw":
-                result
-
+                    result,
             }
 
 
-        # اگر JSON نبود ولی HTTP موفق بود
         return {
-
-            "success":
-            True,
-
+            "success": True,
             "message":
-            "درخواست ارسال پیامک ثبت شد",
-
+                "درخواست ارسال پیامک ثبت شد",
             "raw":
-            raw_text
-
+                raw_text,
         }
 
 
     except requests.RequestException as e:
 
         print(
-            "AMOOT REQUEST ERROR"
+            "AMOOT REQUEST ERROR:",
+            e,
         )
-
-        print(e)
 
 
         return {
-
-            "success":
-            False,
-
+            "success": False,
             "message":
-            "ارتباط با آموت برقرار نشد",
-
+                "ارتباط با آموت برقرار نشد",
             "raw":
-            str(e)
-
+                str(e),
         }
 
 
@@ -431,10 +354,12 @@ def send_sms_simple(
 # =========================================================
 
 def hash_password(
-    password
+    password: str,
 ):
 
-    salt = secrets.token_hex(16)
+    salt = secrets.token_hex(
+        16
+    )
 
 
     digest = hashlib.pbkdf2_hmac(
@@ -445,7 +370,7 @@ def hash_password(
 
         salt.encode(),
 
-        200000
+        200000,
 
     ).hex()
 
@@ -462,13 +387,15 @@ def hash_password(
 
 
 def verify_password(
-    password,
-    hashed
+    password: str,
+    hashed: str,
 ):
 
     try:
 
-        _, _, salt, old = hashed.split("$")
+        _, _, salt, old = (
+            hashed.split("$")
+        )
 
 
         new = hashlib.pbkdf2_hmac(
@@ -479,14 +406,14 @@ def verify_password(
 
             salt.encode(),
 
-            200000
+            200000,
 
         ).hex()
 
 
         return secrets.compare_digest(
             new,
-            old
+            old,
         )
 
 
@@ -500,11 +427,8 @@ def verify_password(
 # =========================================================
 
 app = FastAPI(
-
     title="GAPINO",
-
-    version="5.0"
-
+    version="5.0",
 )
 
 
@@ -513,19 +437,15 @@ app.add_middleware(
     SessionMiddleware,
 
     secret_key=os.getenv(
-
         "GAPINO_SECRET",
-
-        "CHANGE_THIS_SECRET"
-
+        "CHANGE_THIS_SECRET",
     ),
 
     session_cookie="gapino_session",
 
     same_site="lax",
 
-    https_only=False
-
+    https_only=False,
 )
 
 
@@ -539,16 +459,18 @@ app.add_middleware(
 
     allow_methods=["*"],
 
-    allow_headers=["*"]
-
+    allow_headers=["*"],
 )
 
 
 # =========================================================
-# WEBSOCKET USERS
+# WEBSOCKET
 # =========================================================
 
-active_connections: Dict[str, WebSocket] = {}
+active_connections: Dict[
+    str,
+    WebSocket,
+] = {}
 
 
 # =========================================================
@@ -556,7 +478,7 @@ active_connections: Dict[str, WebSocket] = {}
 # =========================================================
 
 def find_user_by_mobile(
-    mobile
+    mobile: str,
 ):
 
     users = read_json(
@@ -566,7 +488,9 @@ def find_user_by_mobile(
 
     for user in users:
 
-        if user.get("mobile") == mobile:
+        if user.get(
+            "mobile"
+        ) == mobile:
 
             return user
 
@@ -575,7 +499,7 @@ def find_user_by_mobile(
 
 
 def find_user_by_id(
-    user_id
+    user_id: str,
 ):
 
     users = read_json(
@@ -585,7 +509,9 @@ def find_user_by_id(
 
     for user in users:
 
-        if user.get("id") == user_id:
+        if user.get(
+            "id"
+        ) == user_id:
 
             return user
 
@@ -594,38 +520,38 @@ def find_user_by_id(
 
 
 def public_user(
-    user
+    user,
 ):
 
     return {
 
         "id":
-        user.get("id"),
+            user.get("id"),
 
         "username":
-        user.get("username"),
+            user.get("username"),
 
         "mobile":
-        user.get("mobile"),
+            user.get("mobile"),
 
         "avatar":
-        user.get("avatar", ""),
+            user.get("avatar", ""),
 
         "status":
-        user.get(
-            "status",
-            ""
-        ),
+            user.get(
+                "status",
+                "",
+            ),
 
         "online":
-        user.get("id")
-        in active_connections
+            user.get("id")
+            in active_connections,
 
     }
 
 
 def current_user(
-    request: Request
+    request: Request,
 ):
 
     user_id = request.session.get(
@@ -653,16 +579,16 @@ async def health():
     return {
 
         "success":
-        True,
+            True,
 
         "server":
-        "GAPINO",
+            "GAPINO",
 
         "time":
-        tehran_time(),
+            tehran_time(),
 
         "sms_configured":
-        bool(AMOOT_TOKEN)
+            bool(AMOOT_TOKEN),
 
     }
 
@@ -676,7 +602,7 @@ async def register(
 
     username: str = Form(...),
 
-    mobile: str = Form(...)
+    mobile: str = Form(...),
 
 ):
 
@@ -689,10 +615,11 @@ async def register(
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "نام کاربری کوتاه است"
+                "نام کاربری کوتاه است",
 
         }
 
@@ -701,16 +628,17 @@ async def register(
 
         r"^[a-zA-Z0-9._-]+$",
 
-        username
+        username,
 
     ):
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "نام کاربری نامعتبر است"
+                "نام کاربری نامعتبر است",
 
         }
 
@@ -719,16 +647,17 @@ async def register(
 
         r"^09\d{9}$",
 
-        mobile
+        mobile,
 
     ):
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "شماره موبایل اشتباه است"
+                "شماره موبایل اشتباه است",
 
         }
 
@@ -740,26 +669,32 @@ async def register(
 
     for user in users:
 
-        if user.get("username") == username:
+        if user.get(
+            "username"
+        ) == username:
 
             return {
 
-                "success": False,
+                "success":
+                    False,
 
                 "message":
-                "نام کاربری وجود دارد"
+                    "نام کاربری وجود دارد",
 
             }
 
 
-        if user.get("mobile") == mobile:
+        if user.get(
+            "mobile"
+        ) == mobile:
 
             return {
 
-                "success": False,
+                "success":
+                    False,
 
                 "message":
-                "شماره قبلا ثبت شده"
+                    "شماره قبلا ثبت شده",
 
             }
 
@@ -767,59 +702,62 @@ async def register(
     user = {
 
         "id":
-        str(uuid.uuid4()),
+            str(uuid.uuid4()),
 
         "username":
-        username,
+            username,
 
         "mobile":
-        mobile,
+            mobile,
 
         "password":
-        hash_password(mobile),
+            hash_password(mobile),
 
         "avatar":
-        "",
+            "",
 
         "status":
-        "سلام! من در GAPINO هستم",
+            "سلام! من در GAPINO هستم",
 
         "created":
-        tehran_time()
+            tehran_time(),
 
     }
 
 
-    users.append(user)
+    users.append(
+        user
+    )
 
 
     save_json(
 
         USERS_FILE,
 
-        users
+        users,
 
     )
 
 
     return {
 
-        "success": True,
+        "success":
+            True,
 
         "user":
-        public_user(user)
+            public_user(user),
 
     }
 
 
 # =========================================================
-# SEND CODE
+# SEND OTP
 # =========================================================
 
 @app.post("/send-code")
 async def send_code(
 
-    mobile: str = Form(...)
+    mobile: str = Form(...),
 
 ):
 
@@ -830,23 +768,20 @@ async def send_code(
 
         r"^09\d{9}$",
 
-        mobile
+        mobile,
 
     ):
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "شماره موبایل اشتباه است"
+                "شماره موبایل اشتباه است",
 
         }
 
-
-    # -----------------------------------------------------
-    # بررسی زمان ارسال قبلی
-    # -----------------------------------------------------
 
     codes = read_json(
         CODES_FILE
@@ -862,118 +797,104 @@ async def send_code(
 
         last_timestamp = old.get(
             "timestamp",
-            0
+            0,
         )
 
 
-        if time.time() - last_timestamp < 60:
+        elapsed = (
+            time.time()
+            -
+            last_timestamp
+        )
 
-            remaining = int(
-                60 -
-                (
-                    time.time()
-                    -
-                    last_timestamp
-                )
+
+        if elapsed < 60:
+
+            remaining = max(
+                1,
+                int(
+                    60 - elapsed
+                ),
             )
+
 
             return {
 
                 "success":
-                False,
+                    False,
 
                 "message":
-                f"لطفاً {remaining} ثانیه صبر کنید"
+                    f"لطفاً {remaining} ثانیه صبر کنید",
 
             }
 
 
-    # -----------------------------------------------------
-    # تولید کد ۶ رقمی
-    # -----------------------------------------------------
+    # =====================================================
+    # CREATE 6 DIGIT CODE
+    # =====================================================
 
     code = str(
 
-        secrets.randbelow(900000)
-
-        + 100000
+        secrets.randbelow(
+            900000
+        )
+        +
+        100000
 
     )
 
-
-    # -----------------------------------------------------
-    # متن پیامک
-    # -----------------------------------------------------
 
     sms_text = (
-
-        f"کد اعتبارسنجی GAPINO: {code}"
-
+        f"کد ورود GAPINO: {code}"
     )
 
 
-    # -----------------------------------------------------
-    # ارسال به آموت
-    # -----------------------------------------------------
+    # =====================================================
+    # SEND SMS
+    # =====================================================
 
     sms_result = send_sms_simple(
 
         mobile,
 
-        sms_text
+        sms_text,
 
     )
 
 
     if not sms_result.get(
         "success",
-        False
+        False,
     ):
-
-        print("==============================")
-
-        print("SMS SEND FAILED")
-
-        print(
-            sms_result
-        )
-
-        print("==============================")
-
 
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            sms_result.get(
-                "message",
-                "ارسال پیامک ناموفق بود"
-            ),
-
-            "provider_response":
-            sms_result.get(
-                "raw"
-            )
+                sms_result.get(
+                    "message",
+                    "ارسال پیامک ناموفق بود",
+                ),
 
         }
 
 
-    # -----------------------------------------------------
-    # ذخیره کد
-    # -----------------------------------------------------
+    # =====================================================
+    # SAVE OTP
+    # =====================================================
 
     codes[mobile] = {
 
         "code":
-        code,
+            code,
 
         "timestamp":
-        time.time(),
+            time.time(),
 
         "created":
-        tehran_time()
+            tehran_time(),
 
     }
 
@@ -982,7 +903,7 @@ async def send_code(
 
         CODES_FILE,
 
-        codes
+        codes,
 
     )
 
@@ -990,16 +911,16 @@ async def send_code(
     return {
 
         "success":
-        True,
+            True,
 
         "message":
-        "کد اعتبارسنجی ارسال شد"
+            "کد ورود ارسال شد",
 
     }
 
 
 # =========================================================
-# VERIFY CODE
+# VERIFY OTP
 # =========================================================
 
 @app.post("/verify-code")
@@ -1007,7 +928,7 @@ async def verify_code(
 
     mobile: str = Form(...),
 
-    code: str = Form(...)
+    code: str = Form(...),
 
 ):
 
@@ -1017,39 +938,33 @@ async def verify_code(
 
 
     if not re.match(
-
         r"^09\d{9}$",
-
-        mobile
-
+        mobile,
     ):
 
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "شماره موبایل اشتباه است"
+                "شماره موبایل اشتباه است",
 
         }
 
 
     if not re.match(
-
         r"^\d{6}$",
-
-        code
-
+        code,
     ):
 
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "کد باید ۶ رقمی باشد"
+                "کد باید ۶ رقمی باشد",
 
         }
 
@@ -1068,48 +983,53 @@ async def verify_code(
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "کدی برای این شماره وجود ندارد"
+                "کدی برای این شماره وجود ندارد",
 
         }
 
 
-    # انقضای کد بعد از ۵ دقیقه
     if time.time() - saved.get(
         "timestamp",
-        0
+        0,
     ) > 300:
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "کد منقضی شده است"
+                "کد منقضی شده است",
 
         }
 
 
-    if saved.get("code") != code:
+    if saved.get(
+        "code"
+    ) != code:
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "کد اشتباه است"
+                "کد اشتباه است",
 
         }
 
 
     return {
 
-        "success": True,
+        "success":
+            True,
 
         "message":
-        "کد تایید شد"
+            "کد تایید شد",
 
     }
 
@@ -1123,7 +1043,7 @@ async def login(
 
     request: Request,
 
-    mobile: str = Form(...)
+    mobile: str = Form(...),
 
 ):
 
@@ -1139,34 +1059,38 @@ async def login(
 
         return {
 
-            "success": False,
+            "success":
+                False,
 
             "message":
-            "کاربر پیدا نشد"
+                "کاربر پیدا نشد",
 
         }
 
 
-    request.session["user_id"] = user["id"]
+    request.session[
+        "user_id"
+    ] = user["id"]
 
 
     return {
 
-        "success": True,
+        "success":
+            True,
 
         "user":
-        public_user(user)
+            public_user(user),
 
     }
 
 
 # =========================================================
-# CURRENT USER
+# ME
 # =========================================================
 
 @app.get("/me")
 async def me(
-    request: Request
+    request: Request,
 ):
 
     user = current_user(
@@ -1179,10 +1103,10 @@ async def me(
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "وارد حساب نشده‌اید"
+                "وارد حساب نشده‌اید",
 
         }
 
@@ -1190,10 +1114,10 @@ async def me(
     return {
 
         "success":
-        True,
+            True,
 
         "user":
-        public_user(user)
+            public_user(user),
 
     }
 
@@ -1204,7 +1128,7 @@ async def me(
 
 @app.post("/logout")
 async def logout(
-    request: Request
+    request: Request,
 ):
 
     request.session.clear()
@@ -1213,10 +1137,10 @@ async def logout(
     return {
 
         "success":
-        True,
+            True,
 
         "message":
-        "خارج شدید"
+            "خارج شدید",
 
     }
 
@@ -1236,24 +1160,24 @@ async def users():
     return {
 
         "success":
-        True,
+            True,
 
         "users":
-        [
-            public_user(user)
-            for user in all_users
-        ]
+            [
+                public_user(user)
+                for user in all_users
+            ],
 
     }
 
 
 # =========================================================
-# MESSAGES
+# MESSAGES GET
 # =========================================================
 
 @app.get("/messages")
-async def messages(
-    request: Request
+async def get_messages(
+    request: Request,
 ):
 
     user = current_user(
@@ -1266,13 +1190,13 @@ async def messages(
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "ابتدا وارد شوید",
+                "ابتدا وارد شوید",
 
             "messages":
-            []
+                [],
 
         }
 
@@ -1285,16 +1209,16 @@ async def messages(
     return {
 
         "success":
-        True,
+            True,
 
         "messages":
-        data
+            data,
 
     }
 
 
 # =========================================================
-# SEND MESSAGE
+# SEND MESSAGE HTTP
 # =========================================================
 
 @app.post("/messages")
@@ -1304,7 +1228,7 @@ async def send_message(
 
     receiver_id: str = Form(...),
 
-    text: str = Form("")
+    text: str = Form(""),
 
 ):
 
@@ -1318,10 +1242,10 @@ async def send_message(
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "ابتدا وارد شوید"
+                "ابتدا وارد شوید",
 
         }
 
@@ -1334,10 +1258,10 @@ async def send_message(
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "متن پیام خالی است"
+                "متن پیام خالی است",
 
         }
 
@@ -1352,10 +1276,10 @@ async def send_message(
         return {
 
             "success":
-            False,
+                False,
 
             "message":
-            "گیرنده پیدا نشد"
+                "گیرنده پیدا نشد",
 
         }
 
@@ -1368,19 +1292,19 @@ async def send_message(
     message = {
 
         "id":
-        str(uuid.uuid4()),
+            str(uuid.uuid4()),
 
         "sender_id":
-        user["id"],
+            user["id"],
 
         "receiver_id":
-        receiver_id,
+            receiver_id,
 
         "text":
-        text,
+            text,
 
         "created":
-        tehran_time()
+            tehran_time(),
 
     }
 
@@ -1394,28 +1318,29 @@ async def send_message(
 
         MESSAGES_FILE,
 
-        messages_data
+        messages_data,
 
     )
 
 
-    # ارسال لحظه‌ای اگر کاربر آنلاین باشد
-    ws = active_connections.get(
-        receiver_id
+    receiver_ws = (
+        active_connections.get(
+            receiver_id
+        )
     )
 
 
-    if ws:
+    if receiver_ws:
 
         try:
 
-            await ws.send_json({
+            await receiver_ws.send_json({
 
                 "type":
-                "message",
+                    "message",
 
                 "message":
-                message
+                    message,
 
             })
 
@@ -1427,10 +1352,10 @@ async def send_message(
     return {
 
         "success":
-        True,
+            True,
 
         "message":
-        message
+            message,
 
     }
 
@@ -1444,7 +1369,7 @@ async def websocket_endpoint(
 
     websocket: WebSocket,
 
-    user_id: str
+    user_id: str,
 
 ):
 
@@ -1463,7 +1388,9 @@ async def websocket_endpoint(
     await websocket.accept()
 
 
-    active_connections[user_id] = websocket
+    active_connections[
+        user_id
+    ] = websocket
 
 
     try:
@@ -1478,18 +1405,26 @@ async def websocket_endpoint(
             )
 
 
+            # =============================================
+            # PING
+            # =============================================
+
             if message_type == "ping":
 
                 await websocket.send_json({
 
                     "type":
-                    "pong",
+                        "pong",
 
                     "time":
-                    tehran_time()
+                        tehran_time(),
 
                 })
 
+
+            # =============================================
+            # TYPING
+            # =============================================
 
             elif message_type == "typing":
 
@@ -1512,10 +1447,10 @@ async def websocket_endpoint(
                         await receiver_ws.send_json({
 
                             "type":
-                            "typing",
+                                "typing",
 
                             "user_id":
-                            user_id
+                                user_id,
 
                         })
 
@@ -1524,16 +1459,21 @@ async def websocket_endpoint(
                         pass
 
 
+            # =============================================
+            # MESSAGE
+            # =============================================
+
             elif message_type == "message":
 
                 receiver_id = data.get(
                     "receiver_id"
                 )
 
+
                 text = str(
                     data.get(
                         "text",
-                        ""
+                        "",
                     )
                 ).strip()
 
@@ -1561,19 +1501,19 @@ async def websocket_endpoint(
                 message = {
 
                     "id":
-                    str(uuid.uuid4()),
+                        str(uuid.uuid4()),
 
                     "sender_id":
-                    user_id,
+                        user_id,
 
                     "receiver_id":
-                    receiver_id,
+                        receiver_id,
 
                     "text":
-                    text,
+                        text,
 
                     "created":
-                    tehran_time()
+                        tehran_time(),
 
                 }
 
@@ -1587,7 +1527,7 @@ async def websocket_endpoint(
 
                     MESSAGES_FILE,
 
-                    messages_data
+                    messages_data,
 
                 )
 
@@ -1606,10 +1546,10 @@ async def websocket_endpoint(
                         await receiver_ws.send_json({
 
                             "type":
-                            "message",
+                                "message",
 
                             "message":
-                            message
+                                message,
 
                         })
 
@@ -1621,10 +1561,10 @@ async def websocket_endpoint(
                 await websocket.send_json({
 
                     "type":
-                    "message_sent",
+                        "message_sent",
 
                     "message":
-                    message
+                        message,
 
                 })
 
@@ -1638,7 +1578,7 @@ async def websocket_endpoint(
 
         print(
             "WEBSOCKET ERROR:",
-            e
+            e,
         )
 
 
@@ -1651,7 +1591,9 @@ async def websocket_endpoint(
             is websocket
         ):
 
-            del active_connections[user_id]
+            del active_connections[
+                user_id
+            ]
 
 
 # =========================================================
@@ -1664,12 +1606,12 @@ async def online_users():
     return {
 
         "success":
-        True,
+            True,
 
         "users":
-        list(
-            active_connections.keys()
-        )
+            list(
+                active_connections.keys()
+            ),
 
     }
 
@@ -1684,16 +1626,16 @@ async def get_time():
     return {
 
         "success":
-        True,
+            True,
 
         "time":
-        tehran_time()
+            tehran_time(),
 
     }
 
 
 # =========================================================
-# FRONTEND
+# ROOT
 # =========================================================
 
 @app.get("/")
@@ -1715,13 +1657,13 @@ async def root():
     return {
 
         "success":
-        True,
+            True,
 
         "app":
-        "GAPINO",
+            "GAPINO",
 
         "message":
-        "GAPINO server is running"
+            "GAPINO server is running",
 
     }
 
@@ -1748,7 +1690,7 @@ async def chat_html():
 
     raise HTTPException(
         status_code=404,
-        detail="chat.html not found"
+        detail="chat.html not found",
     )
 
 
@@ -1774,7 +1716,7 @@ async def login_html():
 
     raise HTTPException(
         status_code=404,
-        detail="login.html not found"
+        detail="login.html not found",
     )
 
 
@@ -1800,7 +1742,7 @@ async def register_html():
 
     raise HTTPException(
         status_code=404,
-        detail="register.html not found"
+        detail="register.html not found",
     )
 
 
@@ -1810,7 +1752,7 @@ async def register_html():
 
 @app.get("/frontend/{file_name:path}")
 async def frontend_file(
-    file_name: str
+    file_name: str,
 ):
 
     file = (
@@ -1823,7 +1765,7 @@ async def frontend_file(
 
         raise HTTPException(
             status_code=404,
-            detail="File not found"
+            detail="File not found",
         )
 
 
@@ -1833,7 +1775,7 @@ async def frontend_file(
 
 
 # =========================================================
-# RUN DIRECTLY
+# RUN
 # =========================================================
 
 if __name__ == "__main__":
@@ -1850,10 +1792,9 @@ if __name__ == "__main__":
         port=int(
             os.getenv(
                 "PORT",
-                "8000"
+                "8000",
             )
         ),
 
-        reload=False
-
+        reload=False,
     )
