@@ -2,1269 +2,733 @@
 <html lang="fa" dir="rtl">
 
 <head>
-    <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+<meta charset="UTF-8">
 
-    <title>ورود | GAPINO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<title>
+ورود GAPINO
+</title>
 
-        html,
-        body {
-            width: 100%;
-            min-height: 100%;
-            margin: 0;
-            padding: 0;
-        }
 
-        body {
-            font-family:
-                Tahoma,
-                Arial,
-                sans-serif;
+<style>
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #eef4ff,
-                    #dce9ff
-                );
+*{
+box-sizing:border-box;
+}
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
 
-            padding: 20px;
-        }
+body{
 
-        button,
-        input {
-            font-family: inherit;
-        }
+margin:0;
 
-        .login-box {
-            width: 100%;
-            max-width: 430px;
+min-height:100vh;
 
-            background: #fff;
+display:flex;
 
-            border-radius: 24px;
+align-items:center;
 
-            padding: 30px;
+justify-content:center;
 
-            box-shadow:
-                0 20px 60px
-                rgba(0, 0, 0, 0.12);
-        }
+background:
+linear-gradient(
+135deg,
+#edf4ff,
+#dce8ff
+);
 
-        .logo {
-            width: 82px;
-            height: 82px;
+font-family:
+Tahoma,
+Arial;
 
-            margin: 0 auto 18px;
+padding:20px;
 
-            border-radius: 22px;
+}
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #4f7cff,
-                    #315bdc
-                );
 
-            color: #fff;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+.box{
 
-            font-size: 28px;
-            font-weight: 900;
+width:100%;
 
-            box-shadow:
-                0 10px 30px
-                rgba(49, 91, 220, 0.25);
-        }
+max-width:420px;
 
-        h1 {
-            margin: 0;
+background:white;
 
-            text-align: center;
+padding:30px;
 
-            color: #1c2740;
+border-radius:24px;
 
-            font-size: 27px;
-        }
+box-shadow:
+0 20px 60px
+rgba(0,0,0,.12);
 
-        .subtitle {
-            margin:
-                10px 0 25px;
+}
 
-            text-align: center;
 
-            color: #778199;
 
-            font-size: 14px;
+.logo{
 
-            line-height: 1.8;
-        }
+width:80px;
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+height:80px;
 
-        label {
-            display: block;
+margin:auto;
 
-            margin-bottom: 8px;
+border-radius:20px;
 
-            color: #35415c;
+background:
+linear-gradient(
+135deg,
+#4f7cff,
+#315bdc
+);
 
-            font-weight: bold;
+color:white;
 
-            font-size: 14px;
-        }
+display:flex;
 
-        input {
-            width: 100%;
+align-items:center;
 
-            height: 52px;
+justify-content:center;
 
-            border:
-                1px solid #dce2ed;
+font-size:28px;
 
-            border-radius: 14px;
+font-weight:bold;
 
-            padding: 0 15px;
+}
 
-            outline: none;
 
-            background: #f9fbff;
 
-            color: #1d2940;
+h1{
 
-            font-size: 16px;
+text-align:center;
 
-            transition: 0.2s;
-        }
+color:#1d2940;
 
-        input:focus {
-            border-color: #4f7cff;
+}
 
-            background: #fff;
 
-            box-shadow:
-                0 0 0 4px
-                rgba(
-                    79,
-                    124,
-                    255,
-                    0.10
-                );
-        }
 
-        .submit-button {
-            width: 100%;
+input{
 
-            height: 54px;
+width:100%;
 
-            border: 0;
+height:52px;
 
-            border-radius: 15px;
+margin-top:12px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #4f7cff,
-                    #315bdc
-                );
+border:
 
-            color: #fff;
+1px solid #dce2ed;
 
-            font-size: 17px;
+border-radius:14px;
 
-            font-weight: bold;
+padding:0 15px;
 
-            cursor: pointer;
+font-size:16px;
 
-            transition: 0.2s;
-        }
+}
 
-        .submit-button:hover {
-            transform:
-                translateY(-1px);
-        }
 
-        .submit-button:disabled {
-            opacity: .65;
 
-            cursor: wait;
+button{
 
-            transform: none;
-        }
+width:100%;
 
-        .secondary-button {
-            width: 100%;
+height:52px;
 
-            height: 48px;
+margin-top:15px;
 
-            margin-top: 10px;
+border:0;
 
-            border:
-                1px solid #dce2ed;
+border-radius:14px;
 
-            border-radius: 14px;
+background:
+linear-gradient(
+135deg,
+#4f7cff,
+#315bdc
+);
 
-            background:
-                #f7f9fc;
+color:white;
 
-            color:
-                #47536b;
+font-size:16px;
 
-            font-size: 14px;
+font-weight:bold;
 
-            font-weight: bold;
+cursor:pointer;
 
-            cursor: pointer;
-        }
+}
 
-        .secondary-button:hover {
-            background:
-                #eef2f8;
-        }
 
-        .message {
-            min-height: 24px;
 
-            margin-top: 14px;
+button:disabled{
 
-            text-align: center;
+opacity:.6;
 
-            font-size: 13px;
+}
 
-            line-height: 1.8;
-        }
 
-        .message.error {
-            color: #d33b3b;
-        }
 
-        .message.success {
-            color: #218838;
-        }
+.message{
 
-        .message.info {
-            color: #52627d;
-        }
+text-align:center;
 
-        .hidden {
-            display: none !important;
-        }
+margin-top:15px;
 
-        .code-info {
-            margin-bottom: 15px;
+line-height:1.8;
 
-            padding: 12px;
+}
 
-            border-radius: 12px;
 
-            background:
-                #f4f7ff;
 
-            color:
-                #52627d;
+.error{
 
-            font-size: 12px;
+color:#d33;
 
-            line-height: 1.8;
+}
 
-            text-align: center;
-        }
 
-        .timer {
-            margin-top: 10px;
 
-            text-align: center;
+.success{
 
-            color: #667085;
+color:#198754;
 
-            font-size: 12px;
-        }
+}
 
-        .bottom {
-            margin-top: 20px;
 
-            text-align: center;
 
-            color: #778199;
+.hide{
 
-            font-size: 14px;
-        }
+display:none;
 
-        .link-button {
-            border: 0;
+}
 
-            background: transparent;
 
-            color: #315bdc;
 
-            cursor: pointer;
+a{
 
-            font-size: 14px;
+display:block;
 
-            font-weight: bold;
-        }
+text-align:center;
 
-        @media (max-width: 480px) {
-            body {
-                padding: 12px;
-            }
+margin-top:20px;
 
-            .login-box {
-                padding: 22px;
-                border-radius: 20px;
-            }
+color:#315bdc;
 
-            h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+text-decoration:none;
+
+}
+
+
+</style>
+
+
 </head>
+
 
 <body>
 
-<main class="login-box">
 
-    <div class="logo">
-        GAP
-    </div>
-
-    <h1>
-        ورود به GAPINO
-    </h1>
-
-    <div class="subtitle">
-        با نام کاربری و کد تأیید وارد شوید
-    </div>
-
-    <!-- مرحله اول -->
-
-    <section id="usernameStep">
-
-        <div class="form-group">
-
-            <label for="username">
-                نام کاربری
-            </label>
-
-            <input
-                id="username"
-                name="username"
-                type="text"
-                maxlength="30"
-                autocomplete="username"
-                placeholder="نام کاربری"
-                required
-            >
-
-        </div>
-
-        <button
-            id="sendCodeButton"
-            class="submit-button"
-            type="button"
-        >
-            ارسال کد تأیید
-        </button>
-
-    </section>
+<div class="box">
 
 
-    <!-- مرحله دوم -->
-
-    <section
-        id="codeStep"
-        class="hidden"
-    >
-
-        <div class="code-info">
-
-            کد تأیید به شماره موبایل ثبت‌شده
-            برای این حساب ارسال شد.
-
-        </div>
-
-        <div class="form-group">
-
-            <label for="verificationCode">
-                کد تأیید
-            </label>
-
-            <input
-                id="verificationCode"
-                type="text"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-                maxlength="6"
-                placeholder="کد ۶ رقمی"
-            >
-
-        </div>
-
-        <button
-            id="verifyCodeButton"
-            class="submit-button"
-            type="button"
-        >
-            تأیید و ورود
-        </button>
-
-        <button
-            id="changeUsernameButton"
-            class="secondary-button"
-            type="button"
-        >
-            تغییر نام کاربری
-        </button>
-
-        <div
-            id="timer"
-            class="timer"
-        ></div>
-
-        <button
-            id="resendButton"
-            class="secondary-button hidden"
-            type="button"
-        >
-            ارسال دوباره کد
-        </button>
-
-    </section>
+<div class="logo">
+GAP
+</div>
 
 
-    <div
-        id="loginMessage"
-        class="message"
-        aria-live="polite"
-    ></div>
+<h1>
+ورود GAPINO
+</h1>
 
 
-      <div class="bottom">
 
-    اگه حساب نداری؟
 
-    <button
-        id="registerButton"
-        class="link-button"
-        type="button"
-    >
-        ساخت حساب
-    </button>
+<input
+
+id="mobile"
+
+type="tel"
+
+placeholder="09120000000"
+
+>
+
+
+
+<button id="sendCode">
+
+ارسال کد ورود
+
+</button>
+
+
+
+
+
+<div id="codeBox" class="hide">
+
+
+<input
+
+id="code"
+
+placeholder="کد ۶ رقمی"
+
+>
+
+
+<button id="loginButton">
+
+ورود
+
+</button>
+
 
 </div>
 
-</main>.
+
+
+
+
+<div id="message" class="message"></div>
+
+
+
+
+<a href="register.html">
+
+ساخت حساب جدید
+
+</a>
+
+
+
+</div>
+
+
+
 
 
 <script>
 
-"use strict";
+
+const API = "http://localhost:8000";
 
 
-const API =
-    "https://gapino3.onrender.com";
+
+const mobile =
+document.getElementById(
+"mobile"
+);
 
 
-const usernameStep =
-    document.getElementById(
-        "usernameStep"
-    );
-
-const codeStep =
-    document.getElementById(
-        "codeStep"
-    );
-
-const usernameInput =
-    document.getElementById(
-        "username"
-    );
-
-const verificationCodeInput =
-    document.getElementById(
-        "verificationCode"
-    );
-
-const sendCodeButton =
-    document.getElementById(
-        "sendCodeButton"
-    );
-
-const verifyCodeButton =
-    document.getElementById(
-        "verifyCodeButton"
-    );
-
-const changeUsernameButton =
-    document.getElementById(
-        "changeUsernameButton"
-    );
-
-const resendButton =
-    document.getElementById(
-        "resendButton"
-    );
-
-const timerElement =
-    document.getElementById(
-        "timer"
-    );
-
-const registerButton =
-    document.getElementById(
-        "registerButton"
-    );
-
-const loginMessage =
-    document.getElementById(
-        "loginMessage"
-    );
+const code =
+document.getElementById(
+"code"
+);
 
 
-let currentUsername = "";
 
-let resendTimer = null;
+const sendCode =
+document.getElementById(
+"sendCode"
+);
 
-let resendSeconds = 0;
+
+
+const loginButton =
+document.getElementById(
+"loginButton"
+);
+
+
+
+const codeBox =
+document.getElementById(
+"codeBox"
+);
+
+
+
+const message =
+document.getElementById(
+"message"
+);
+
+
+
 
 
 function showMessage(
-    text,
-    type = "info"
-) {
+text,
+type=""
+){
 
-    if (!loginMessage) {
-        return;
-    }
+message.textContent =
+text;
 
-    loginMessage.textContent =
-        String(text || "");
 
-    loginMessage.className =
-        "message " + type;
-}
-
-
-function setButtonLoading(
-    button,
-    loading,
-    normalText,
-    loadingText
-) {
-
-    if (!button) {
-        return;
-    }
-
-    button.disabled =
-        Boolean(loading);
-
-    button.textContent =
-        loading
-            ? loadingText
-            : normalText;
-}
-
-
-async function readJson(
-    response
-) {
-
-    const text =
-        await response.text();
-
-    if (!text) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(
-            text
-        );
-    } catch {
-        return null;
-    }
-}
-
-
-function saveUser(
-    user
-) {
-
-    if (
-        !user ||
-        !user.id
-    ) {
-        return;
-    }
-
-    try {
-
-        localStorage.setItem(
-            "gapino_user",
-            JSON.stringify(user)
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "SAVE USER ERROR:",
-            error
-        );
-    }
-}
-
-
-function getSavedUser() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "gapino_user"
-            );
-
-        if (!raw) {
-            return null;
-        }
-
-        const user =
-            JSON.parse(
-                raw
-            );
-
-        return (
-            user &&
-            user.id
-        )
-            ? user
-            : null;
-
-    } catch {
-
-        return null;
-    }
-}
-
-
-function showCodeStep() {
-
-    usernameStep.classList.add(
-        "hidden"
-    );
-
-    codeStep.classList.remove(
-        "hidden"
-    );
-
-    verificationCodeInput.value = "";
-
-    verificationCodeInput.focus();
-
-    startResendTimer(
-        60
-    );
-}
-
-
-function showUsernameStep() {
-
-    codeStep.classList.add(
-        "hidden"
-    );
-
-    usernameStep.classList.remove(
-        "hidden"
-    );
-
-    verificationCodeInput.value = "";
-
-    usernameInput.focus();
-
-    stopResendTimer();
-
-    timerElement.textContent = "";
-
-    resendButton.classList.add(
-        "hidden"
-    );
-}
-
-
-function startResendTimer(
-    seconds
-) {
-
-    stopResendTimer();
-
-    resendSeconds =
-        Number(seconds) || 60;
-
-    updateTimer();
-
-    resendTimer =
-        setInterval(() => {
-
-            resendSeconds -= 1;
-
-            updateTimer();
-
-            if (
-                resendSeconds <= 0
-            ) {
-
-                stopResendTimer();
-
-                resendButton.classList.remove(
-                    "hidden"
-                );
-
-                timerElement.textContent =
-                    "اکنون می‌توانید کد را دوباره ارسال کنید.";
-            }
-
-        }, 1000);
-}
-
-
-function updateTimer() {
-
-    if (!timerElement) {
-        return;
-    }
-
-    if (resendSeconds > 0) {
-
-        timerElement.textContent =
-            `ارسال دوباره کد تا ${resendSeconds} ثانیه دیگر`;
-
-    } else {
-
-        timerElement.textContent = "";
-    }
-}
-
-
-function stopResendTimer() {
-
-    if (resendTimer) {
-
-        clearInterval(
-            resendTimer
-        );
-
-        resendTimer = null;
-    }
-}
-
-
-async function requestCode() {
-
-    const username =
-        String(
-            usernameInput.value || ""
-        ).trim();
-
-    if (!username) {
-
-        showMessage(
-            "نام کاربری را وارد کنید.",
-            "error"
-        );
-
-        usernameInput.focus();
-
-        return;
-    }
-
-
-    setButtonLoading(
-        sendCodeButton,
-        true,
-        "ارسال کد تأیید",
-        "در حال ارسال..."
-    );
-
-    showMessage(
-        "در حال ارسال کد تأیید...",
-        "info"
-    );
-
-
-    const formData =
-        new FormData();
-
-    formData.append(
-        "username",
-        username
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-                API +
-                "/login/request-code",
-                {
-                    method:
-                        "POST",
-
-                    body:
-                        formData,
-
-                    credentials:
-                        "include",
-
-                    cache:
-                        "no-store"
-                }
-            );
-
-
-        const data =
-            await readJson(
-                response
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data?.message ||
-                data?.detail ||
-                `خطای سرور: ${response.status}`
-            );
-        }
-
-
-        currentUsername =
-            username;
-
-
-        showCodeStep();
-
-
-        showMessage(
-            data?.message ||
-            "کد تأیید ارسال شد.",
-            "success"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "REQUEST OTP ERROR:",
-            error
-        );
-
-        showMessage(
-            error.message ||
-            "ارسال کد انجام نشد.",
-            "error"
-        );
-
-    } finally {
-
-        setButtonLoading(
-            sendCodeButton,
-            false,
-            "ارسال کد تأیید",
-            "در حال ارسال..."
-        );
-    }
-}
-
-
-async function verifyCode() {
-
-    const username =
-        currentUsername ||
-        String(
-            usernameInput.value || ""
-        ).trim();
-
-    const code =
-        String(
-            verificationCodeInput.value || ""
-        ).trim();
-
-
-    if (!username) {
-
-        showUsernameStep();
-
-        showMessage(
-            "نام کاربری را وارد کنید.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    if (!/^\d{6}$/.test(code)) {
-
-        showMessage(
-            "کد تأیید باید ۶ رقمی باشد.",
-            "error"
-        );
-
-        verificationCodeInput.focus();
-
-        return;
-    }
-
-
-    setButtonLoading(
-        verifyCodeButton,
-        true,
-        "تأیید و ورود",
-        "در حال بررسی..."
-    );
-
-
-    showMessage(
-        "در حال بررسی کد...",
-        "info"
-    );
-
-
-    const formData =
-        new FormData();
-
-    formData.append(
-        "username",
-        username
-    );
-
-    formData.append(
-        "code",
-        code
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-                API +
-                "/login/verify-code",
-                {
-                    method:
-                        "POST",
-
-                    body:
-                        formData,
-
-                    credentials:
-                        "include",
-
-                    cache:
-                        "no-store"
-                }
-            );
-
-
-        const data =
-            await readJson(
-                response
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data?.message ||
-                data?.detail ||
-                `خطای سرور: ${response.status}`
-            );
-        }
-
-
-        if (
-            !data ||
-            data.success !== true ||
-            !data.user ||
-            !data.user.id
-        ) {
-
-            throw new Error(
-                "پاسخ ورود از سرور نامعتبر است."
-            );
-        }
-
-
-        saveUser(
-            data.user
-        );
-
-
-        showMessage(
-            "ورود موفق بود...",
-            "success"
-        );
-
-
-        stopResendTimer();
-
-
-        setTimeout(
-            () => {
-
-                window.location.replace(
-                    "chat.html"
-                );
-
-            },
-            300
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "VERIFY OTP ERROR:",
-            error
-        );
-
-        showMessage(
-            error.message ||
-            "کد تأیید صحیح نیست.",
-            "error"
-        );
-
-    } finally {
-
-        setButtonLoading(
-            verifyCodeButton,
-            false,
-            "تأیید و ورود",
-            "در حال بررسی..."
-        );
-    }
-}
-
-
-if (sendCodeButton) {
-
-    sendCodeButton.addEventListener(
-        "click",
-        requestCode
-    );
-}
-
-
-if (verifyCodeButton) {
-
-    verifyCodeButton.addEventListener(
-        "click",
-        verifyCode
-    );
-}
-
-
-if (changeUsernameButton) {
-
-    changeUsernameButton.addEventListener(
-        "click",
-        () => {
-
-            currentUsername = "";
-
-            showUsernameStep();
-
-            showMessage(
-                "",
-                "info"
-            );
-
-        }
-    );
-}
-
-
-if (resendButton) {
-
-    resendButton.addEventListener(
-        "click",
-        requestCode
-    );
-}
-
-
-if (verificationCodeInput) {
-
-    verificationCodeInput.addEventListener(
-        "input",
-        () => {
-
-            verificationCodeInput.value =
-                verificationCodeInput.value
-                    .replace(/\D/g, "")
-                    .slice(0, 6);
-
-            if (
-                verificationCodeInput.value.length === 6
-            ) {
-                verifyCode();
-            }
-
-        }
-    );
-
-
-    verificationCodeInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                verifyCode();
-            }
-
-        }
-    );
-}
-
-
-if (usernameInput) {
-
-    usernameInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                event.preventDefault();
-
-                requestCode();
-            }
-
-        }
-    );
+message.className =
+"message " + type;
 
 }
 
 
-if (registerButton) {
 
-    registerButton.addEventListener(
-        "click",
-        () => {
 
-            window.location.href =
-                "register.html";
 
-        }
-    );
+
+// =====================
+// SEND CODE
+// =====================
+
+
+sendCode.onclick =
+async ()=>{
+
+
+const phone =
+mobile.value.trim();
+
+
+
+if(!/^09\d{9}$/.test(phone)){
+
+
+showMessage(
+"شماره موبایل اشتباه است",
+"error"
+);
+
+
+return;
+
 }
 
 
-async function restoreExistingLogin() {
 
-    const savedUser =
-        getSavedUser();
-
-    if (!savedUser) {
-        return;
-    }
+const form =
+new FormData();
 
 
-    try {
 
-        const response =
-            await fetch(
-                API + "/me",
-                {
-                    method: "GET",
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
+form.append(
+"mobile",
+phone
+);
 
 
-        const data =
-            await readJson(
-                response
-            );
+
+try{
 
 
-        if (
-            response.ok &&
-            data?.authenticated === true &&
-            data?.user?.id
-        ) {
+const res =
+await fetch(
 
-            saveUser(
-                data.user
-            );
+API+"/send-code",
 
-            window.location.replace(
-                "chat.html"
-            );
+{
 
-            return;
-        }
+method:"POST",
+
+body:form
+
+}
+
+);
 
 
-        /*
-         * Session واقعی دیگر معتبر نیست.
-         * localStorage را پاک می‌کنیم تا
-         * امنیت ورود حفظ شود.
-         */
 
-        if (response.status === 401) {
+const data =
+await res.json();
 
-            localStorage.removeItem(
-                "gapino_user"
-            );
-        }
 
-    } catch (error) {
 
-        console.warn(
-            "RESTORE LOGIN ERROR:",
-            error
-        );
 
-        /*
-         * در صورت قطعی موقت اینترنت،
-         * فرم ورود را نگه می‌داریم.
-         */
-    }
+
+if(data.success){
+
+
+showMessage(
+"کد ارسال شد",
+"success"
+);
+
+
+
+codeBox.classList.remove(
+"hide"
+);
+
+
+
+}
+
+else{
+
+
+showMessage(
+data.message,
+"error"
+);
+
+
 }
 
 
-restoreExistingLogin();
+
+}catch(e){
+
+
+showMessage(
+"خطا در ارتباط با سرور",
+"error"
+);
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================
+// VERIFY + LOGIN
+// =====================
+
+
+loginButton.onclick =
+async ()=>{
+
+
+const phone =
+mobile.value.trim();
+
+
+const otp =
+code.value.trim();
+
+
+
+
+if(!otp){
+
+
+showMessage(
+"کد را وارد کنید",
+"error"
+);
+
+
+return;
+
+}
+
+
+
+
+
+
+// VERIFY CODE
+
+
+const verifyForm =
+new FormData();
+
+
+verifyForm.append(
+"mobile",
+phone
+);
+
+
+
+verifyForm.append(
+"code",
+otp
+);
+
+
+
+
+try{
+
+
+const verify =
+await fetch(
+
+API+"/verify-code",
+
+{
+
+method:"POST",
+
+body:verifyForm
+
+}
+
+);
+
+
+
+const verifyData =
+await verify.json();
+
+
+
+
+
+if(!verifyData.success){
+
+
+showMessage(
+verifyData.message,
+"error"
+);
+
+
+return;
+
+}
+
+
+
+
+
+// LOGIN
+
+
+const loginForm =
+new FormData();
+
+
+loginForm.append(
+
+"mobile",
+
+phone
+
+);
+
+
+
+
+
+const login =
+await fetch(
+
+API+"/login",
+
+{
+
+method:"POST",
+
+body:loginForm,
+
+credentials:"include"
+
+}
+
+);
+
+
+
+
+
+const loginData =
+await login.json();
+
+
+
+
+
+
+if(loginData.success){
+
+
+showMessage(
+"ورود موفق. انتقال...",
+"success"
+);
+
+
+
+localStorage.setItem(
+
+"gapino_user",
+
+JSON.stringify(
+loginData.user
+)
+
+);
+
+
+
+
+
+setTimeout(()=>{
+
+
+location.href =
+"chat.html";
+
+
+},1000);
+
+
+
+
+}else{
+
+
+showMessage(
+
+loginData.message,
+
+"error"
+
+);
+
+
+}
+
+
+
+
+
+}catch(e){
+
+
+showMessage(
+"خطای سرور",
+"error"
+);
+
+
+}
+
+
+
+
+};
+
+
 
 </script>
 
+
 </body>
+
 </html>

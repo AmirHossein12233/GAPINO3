@@ -1,14 +1,4 @@
-from fastapi import (
-    FastAPI,
-    Form,
-    File,
-    UploadFile,
-    WebSocket,
-    WebSocketDisconnect,
-    Request,
-    HTTPException,
-)
-
+from fastapi import FastAPI, Form, File, UploadFile, WebSocket, WebSocketDisconnect, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
@@ -20,7 +10,6 @@ from typing import Dict
 import hashlib
 import json
 import os
-import re
 import secrets
 import uuid
 import random
@@ -39,26 +28,15 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 DATA_DIR.mkdir(exist_ok=True)
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-
 USERS_FILE = DATA_DIR / "users.json"
 MESSAGES_FILE = DATA_DIR / "messages.json"
-
 
 for file, default in [
     (USERS_FILE, []),
     (MESSAGES_FILE, []),
 ]:
-
     if not file.exists():
-
-        file.write_text(
-            json.dumps(
-                default,
-                ensure_ascii=False,
-                indent=2
-            ),
-            encoding="utf-8"
-        )
+        file.write_text(json.dumps(default, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 # =========================
@@ -66,57 +44,25 @@ for file, default in [
 # =========================
 
 def read_json(path):
-
     try:
-
-        return json.loads(
-            path.read_text(
-                encoding="utf-8"
-            )
-        )
-
+        return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
-
         return []
 
 
-
 def save_json(path, data):
-
-    path.write_text(
-        json.dumps(
-            data,
-            ensure_ascii=False,
-            indent=2
-        ),
-        encoding="utf-8"
-    )
-
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 # =========================
 # TIME
 # =========================
 
-TEHRAN = timezone(
-    timedelta(
-        hours=3,
-        minutes=30
-    )
-)
-
+TEHRAN = timezone(timedelta(hours=3, minutes=30))
 
 
 def tehran_time():
-
-    return datetime.now(
-        timezone.utc
-    ).astimezone(
-        TEHRAN
-    ).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-
+    return datetime.now(timezone.utc).astimezone(TEHRAN).strftime("%Y-%m-%d %H:%M:%S")
 
 
 # =========================
@@ -124,79 +70,33 @@ def tehran_time():
 # =========================
 
 def hash_password(password):
-
     salt = secrets.token_hex(16)
-
-    digest = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode(),
-        salt.encode(),
-        200000
-    ).hex()
-
-
-    return (
-        "$pbkdf2$"
-        +
-        salt
-        +
-        "$"
-        +
-        digest
-    )
-
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000).hex()
+    return f"$pbkdf2${salt}${digest}"
 
 
 def verify_password(password, hashed):
-
     try:
-
         _, _, salt, old = hashed.split("$")
-
-
-        new = hashlib.pbkdf2_hmac(
-            "sha256",
-            password.encode(),
-            salt.encode(),
-            200000
-        ).hex()
-
-
-        return secrets.compare_digest(
-            new,
-            old
-        )
-
-
+        new = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 200000).hex()
+        return secrets.compare_digest(new, old)
     except Exception:
-
         return False
-
 
 
 # =========================
 # APP
 # =========================
 
-app = FastAPI(
-    title="GAPINO",
-    version="3.0"
-)
-
-
+app = FastAPI(title="GAPINO", version="3.0")
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv(
-        "GAPINO_SECRET",
-        "GAPINO_SECRET_CHANGE"
-    ),
+    secret_key=os.getenv("GAPINO_SECRET", "GAPINO_SECRET_CHANGE"),
     session_cookie="gapino_session",
     same_site="lax",
     https_only=False
 )
-
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -207,30 +107,16 @@ app.add_middleware(
 )
 
 
-
 # =========================
-# CONNECTIONS
+# CONNECTIONS & OTP
 # =========================
 
 active_connections: Dict[str, WebSocket] = {}
-
-
-# =========================
-# OTP
-# =========================
-
-OTP_CODES = {}
+OTP_CODES: Dict[str, dict] = {}  # {user_id: {"code": str, "expires": float}}
 
 
 def create_otp():
-
-    return str(
-        random.randint(
-            100000,
-            999999
-        )
-    )
-
+    return str(random.randint(100000, 999999))
 
 
 # =========================
@@ -238,91 +124,44 @@ def create_otp():
 # =========================
 
 def find_user_by_id(user_id):
-
-    users = read_json(
-        USERS_FILE
-    )
-
+    users = read_json(USERS_FILE)
     for user in users:
-
         if user.get("id") == user_id:
-
             return user
-
     return None
-
 
 
 def find_user_by_username(username):
-
-    users = read_json(
-        USERS_FILE
-    )
-
+    users = read_json(USERS_FILE)
     for user in users:
-
         if user.get("username") == username:
-
             return user
-
     return None
-
 
 
 def find_user_by_mobile(mobile):
-
-    users = read_json(
-        USERS_FILE
-    )
-
+    users = read_json(USERS_FILE)
     for user in users:
-
         if user.get("mobile") == mobile:
-
             return user
-
     return None
 
 
-
 def public_user(user):
-
     return {
-
         "id": user.get("id"),
-
         "username": user.get("username"),
-
         "mobile": user.get("mobile"),
-
-        "avatar": user.get(
-            "avatar",
-            ""
-        ),
-
-        "online":
-            user.get("id")
-            in active_connections
-
+        "avatar": user.get("avatar", ""),
+        "online": user.get("id") in active_connections
     }
 
 
-
 def current_user(request):
-
-    user_id = request.session.get(
-        "user_id"
-    )
-
+    user_id = request.session.get("user_id")
     if not user_id:
-
         return None
-
-
-    return find_user_by_id(
-        user_id
-    )
-
+    return find_user_by_id(user_id)
 
 
 # =========================
@@ -331,38 +170,22 @@ def current_user(request):
 
 @app.get("/")
 async def home():
-
-    return FileResponse(
-        FRONTEND_DIR / "login.html"
-    )
-
+    return FileResponse(FRONTEND_DIR / "login.html")
 
 
 @app.get("/login.html")
 async def login_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "login.html"
-    )
-
+    return FileResponse(FRONTEND_DIR / "login.html")
 
 
 @app.get("/register.html")
 async def register_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "register.html"
-    )
-
+    return FileResponse(FRONTEND_DIR / "register.html")
 
 
 @app.get("/chat.html")
 async def chat_page():
-
-    return FileResponse(
-        FRONTEND_DIR / "chat.html"
-    )
-
+    return FileResponse(FRONTEND_DIR / "chat.html")
 
 
 # =========================
@@ -371,17 +194,7 @@ async def chat_page():
 
 @app.get("/health")
 async def health():
-
-    return {
-
-        "status":
-            "GAPINO running",
-
-        "time":
-            tehran_time()
-
-    }
-
+    return {"status": "GAPINO running", "time": tehran_time()}
 
 
 # =========================
@@ -389,93 +202,31 @@ async def health():
 # =========================
 
 @app.post("/register")
-async def register(
-
-    username: str = Form(...),
-
-    mobile: str = Form(...)
-
-):
-
+async def register(username: str = Form(...), mobile: str = Form(...)):
     username = username.strip()
-
     mobile = mobile.strip()
 
-
-    users = read_json(
-        USERS_FILE
-    )
-
+    users = read_json(USERS_FILE)
 
     for user in users:
-
         if user.get("username") == username:
-
-            return {
-
-                "ok":False,
-
-                "error":
-                    "نام کاربری وجود دارد"
-
-            }
-
-
+            return {"ok": False, "error": "نام کاربری وجود دارد"}
         if user.get("mobile") == mobile:
-
-            return {
-
-                "ok":False,
-
-                "error":
-                    "شماره قبلا ثبت شده"
-
-            }
-
+            return {"ok": False, "error": "شماره قبلا ثبت شده"}
 
     user = {
-
-        "id":
-            str(uuid.uuid4()),
-
-        "username":
-            username,
-
-        "mobile":
-            mobile,
-
-        "password":
-            hash_password(mobile),
-
-        "avatar":
-            "",
-
-        "created":
-            tehran_time()
-
+        "id": str(uuid.uuid4()),
+        "username": username,
+        "mobile": mobile,
+        "password": hash_password(mobile),
+        "avatar": "",
+        "created": tehran_time()
     }
 
+    users.append(user)
+    save_json(USERS_FILE, users)
 
-    users.append(
-        user
-    )
-
-
-    save_json(
-        USERS_FILE,
-        users
-    )
-
-
-    return {
-
-        "ok":True,
-
-        "user":
-            public_user(user)
-
-    }
-
+    return {"ok": True, "user": public_user(user)}
 
 
 # =========================
@@ -483,183 +234,77 @@ async def register(
 # =========================
 
 @app.post("/send-code")
-async def send_code(
-    username: str = Form(...)
-):
-
+async def send_code(username: str = Form(...)):
     username = username.strip()
-
-
-    user = find_user_by_username(
-        username
-    )
-
+    user = find_user_by_username(username)
 
     if not user:
-
-        return {
-
-            "ok":False,
-
-            "error":
-                "کاربر پیدا نشد"
-
-        }
-
+        return {"ok": False, "error": "کاربر پیدا نشد"}
 
     code = create_otp()
-
-
-    OTP_CODES[user["id"]] = code
-
-
-    print(
-        "GAPINO OTP:",
-        code
-    )
-
-
-    return {
-
-        "ok":True,
-
-        "message":
-            "کد ارسال شد"
-
+    OTP_CODES[user["id"]] = {
+        "code": code,
+        "expires": datetime.now().timestamp() + 120  # 2 دقیقه
     }
+
+    print(f"GAPINO OTP for {username}: {code}")
+
+    return {"ok": True, "message": "کد ارسال شد"}
+
+
 # =========================
 # VERIFY CODE
 # =========================
 
 @app.post("/verify-code")
-async def verify_code(
-
-    request: Request,
-
-    username: str = Form(...),
-
-    code: str = Form(...)
-
-):
-
+async def verify_code(request: Request, username: str = Form(...), code: str = Form(...)):
     username = username.strip()
     code = code.strip()
 
-
-    user = find_user_by_username(
-        username
-    )
-
-
+    user = find_user_by_username(username)
     if not user:
+        return {"ok": False, "error": "کاربر پیدا نشد"}
 
-        return {
+    saved = OTP_CODES.get(user["id"])
+    if not saved:
+        return {"ok": False, "error": "ابتدا درخواست کد کنید"}
 
-            "ok":False,
+    # بررسی انقضا
+    if datetime.now().timestamp() > saved["expires"]:
+        OTP_CODES.pop(user["id"], None)
+        return {"ok": False, "error": "کد منقضی شده است"}
 
-            "error":
-                "کاربر پیدا نشد"
-
-        }
-
-
-
-    saved_code = OTP_CODES.get(
-        user["id"]
-    )
-
-
-    if not saved_code:
-
-        return {
-
-            "ok":False,
-
-            "error":
-                "ابتدا درخواست کد کنید"
-
-        }
-
-
-
-    if saved_code != code:
-
-        return {
-
-            "ok":False,
-
-            "error":
-                "کد اشتباه است"
-
-        }
-
-
+    if saved["code"] != code:
+        return {"ok": False, "error": "کد اشتباه است"}
 
     request.session["user_id"] = user["id"]
+    OTP_CODES.pop(user["id"], None)
 
-
-    OTP_CODES.pop(
-        user["id"],
-        None
-    )
-
-
-    return {
-
-        "ok":True,
-
-        "user":
-            public_user(user)
-
-    }
-
+    return {"ok": True, "user": public_user(user)}
 
 
 # =========================
-# LOGIN OLD
+# LOGIN (با OTP)
 # =========================
 
 @app.post("/login")
-async def login(
-
-    request: Request,
-
-    mobile: str = Form(...)
-
-):
-
+async def login(request: Request, mobile: str = Form(...)):
     mobile = mobile.strip()
-
-
-    user = find_user_by_mobile(
-        mobile
-    )
-
+    user = find_user_by_mobile(mobile)
 
     if not user:
+        return {"ok": False, "error": "حسابی با این شماره وجود ندارد"}
 
-        return {
-
-            "ok":False,
-
-            "error":
-                "حسابی با این شماره وجود ندارد"
-
-        }
-
-
-    request.session["user_id"] = user["id"]
-
-
-    return {
-
-        "ok":True,
-
-        "user":
-            public_user(user)
-
+    # ارسال OTP
+    code = create_otp()
+    OTP_CODES[user["id"]] = {
+        "code": code,
+        "expires": datetime.now().timestamp() + 120
     }
 
+    print(f"GAPINO OTP for {mobile}: {code}")
+
+    return {"ok": True, "message": "کد ارسال شد", "username": user["username"]}
 
 
 # =========================
@@ -667,65 +312,22 @@ async def login(
 # =========================
 
 @app.get("/me")
-async def me(
-    request: Request
-):
-
-    user = current_user(
-        request
-    )
-
-
+async def me(request: Request):
+    user = current_user(request)
     if not user:
-
-        return JSONResponse(
-
-            {
-                "ok":False
-            },
-
-            status_code=401
-
-        )
-
-
-    return {
-
-        "ok":True,
-
-        "user":
-            public_user(user)
-
-    }
-
+        return JSONResponse({"ok": False}, status_code=401)
+    return {"ok": True, "user": public_user(user)}
 
 
 # =========================
-# USERS
+# USERS LIST
 # =========================
 
 @app.get("/users")
-async def users(
-    request: Request
-):
-
+async def users(request: Request):
     if not current_user(request):
-
-        raise HTTPException(
-            401
-        )
-
-
-    return [
-
-        public_user(user)
-
-        for user in read_json(
-            USERS_FILE
-        )
-
-    ]
-
+        raise HTTPException(401)
+    return [public_user(user) for user in read_json(USERS_FILE)]
 
 
 # =========================
@@ -733,232 +335,69 @@ async def users(
 # =========================
 
 @app.get("/messages/{user_id}")
-async def messages(
-
-    user_id: str,
-
-    request: Request
-
-):
-
-    user = current_user(
-        request
-    )
-
-
+async def messages(user_id: str, request: Request):
+    user = current_user(request)
     if not user:
-
-        raise HTTPException(
-            401
-        )
-
+        raise HTTPException(401)
 
     result = []
-
-
-    for msg in read_json(
-        MESSAGES_FILE
-    ):
-
-        if (
-
-            msg["sender"] == user["id"]
-
-            and
-
-            msg["receiver"] == user_id
-
-        ) or (
-
-            msg["sender"] == user_id
-
-            and
-
-            msg["receiver"] == user["id"]
-
-        ):
-
-            result.append(
-                msg
-            )
-
+    for msg in read_json(MESSAGES_FILE):
+        if (msg["sender"] == user["id"] and msg["receiver"] == user_id) or \
+           (msg["sender"] == user_id and msg["receiver"] == user["id"]):
+            result.append(msg)
 
     return result
-
 
 
 # =========================
 # WEBSOCKET
 # =========================
 
-async def send_to_user(
-
-    user_id,
-
-    data
-
-):
-
-    ws = active_connections.get(
-        user_id
-    )
-
-
+async def send_to_user(user_id, data):
+    ws = active_connections.get(user_id)
     if ws:
-
         try:
-
-            await ws.send_json(
-                data
-            )
-
+            await ws.send_json(data)
         except:
-
-            active_connections.pop(
-                user_id,
-                None
-            )
-
+            active_connections.pop(user_id, None)
 
 
 @app.websocket("/ws/{user_id}")
-async def websocket(
-
-    websocket: WebSocket,
-
-    user_id: str
-
-):
-
+async def websocket(websocket: WebSocket, user_id: str):
     await websocket.accept()
-
-
     active_connections[user_id] = websocket
 
-
-    await websocket.send_json(
-
-        {
-            "type":
-                "connected"
-        }
-
-    )
-
+    await websocket.send_json({"type": "connected"})
 
     try:
-
         while True:
-
             data = await websocket.receive_json()
-
-
-            event = data.get(
-                "type"
-            )
-
+            event = data.get("type")
 
             if event == "ping":
-
-                await websocket.send_json(
-
-                    {
-                        "type":
-                            "pong"
-                    }
-
-                )
-
+                await websocket.send_json({"type": "pong"})
 
             elif event == "message":
-
-                receiver = data.get(
-                    "receiver"
-                )
-
-
-                text = data.get(
-                    "text",
-                    ""
-                )
-
+                receiver = data.get("receiver")
+                text = data.get("text", "")
 
                 msg = {
-
-                    "id":
-                        str(uuid.uuid4()),
-
-                    "sender":
-                        user_id,
-
-                    "receiver":
-                        receiver,
-
-                    "text":
-                        text,
-
-                    "time":
-                        tehran_time()
-
+                    "id": str(uuid.uuid4()),
+                    "sender": user_id,
+                    "receiver": receiver,
+                    "text": text,
+                    "time": tehran_time()
                 }
 
+                messages = read_json(MESSAGES_FILE)
+                messages.append(msg)
+                save_json(MESSAGES_FILE, messages)
 
-                messages = read_json(
-                    MESSAGES_FILE
-                )
-
-
-                messages.append(
-                    msg
-                )
-
-
-                save_json(
-                    MESSAGES_FILE,
-                    messages
-                )
-
-
-                await send_to_user(
-
-                    receiver,
-
-                    {
-
-                        "type":
-                            "message",
-
-                        "message":
-                            msg
-
-                    }
-
-                )
-
-
-                await websocket.send_json(
-
-                    {
-
-                        "type":
-                            "sent",
-
-                        "message":
-                            msg
-
-                    }
-
-                )
-
+                await send_to_user(receiver, {"type": "message", "message": msg})
+                await websocket.send_json({"type": "sent", "message": msg})
 
     except WebSocketDisconnect:
-
-
-        active_connections.pop(
-            user_id,
-            None
-        )
-
+        active_connections.pop(user_id, None)
 
 
 # =========================
@@ -966,18 +405,5 @@ async def websocket(
 # =========================
 
 if __name__ == "__main__":
-
     import uvicorn
-
-
-    uvicorn.run(
-
-        "main:app",
-
-        host="0.0.0.0",
-
-        port=8000,
-
-        reload=True
-
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
