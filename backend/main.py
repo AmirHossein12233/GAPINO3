@@ -11,9 +11,7 @@
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi.responses import (
-    FileResponse,
-)
+from fastapi.responses import FileResponse
 
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -27,14 +25,15 @@ from datetime import (
 
 from typing import Dict
 
+import base64
 import hashlib
+import hmac
 import json
 import os
 import re
 import secrets
+import time
 import uuid
-
-import shutil
 
 
 # =========================================================
@@ -44,23 +43,13 @@ import shutil
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 FRONTEND_DIR = BASE_DIR / "frontend"
-
 DATA_DIR = BASE_DIR / "data"
-
 UPLOAD_DIR = BASE_DIR / "uploads"
 
-
-DATA_DIR.mkdir(
-    exist_ok=True
-)
-
-UPLOAD_DIR.mkdir(
-    exist_ok=True
-)
-
+DATA_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 USERS_FILE = DATA_DIR / "users.json"
-
 MESSAGES_FILE = DATA_DIR / "messages.json"
 
 
@@ -69,15 +58,10 @@ MESSAGES_FILE = DATA_DIR / "messages.json"
 # =========================================================
 
 for file, default in [
-
     (USERS_FILE, []),
-
     (MESSAGES_FILE, []),
-
 ]:
-
     if not file.exists():
-
         file.write_text(
             json.dumps(
                 default,
@@ -93,17 +77,13 @@ for file, default in [
 # =========================================================
 
 def read_json(path):
-
     try:
-
         return json.loads(
             path.read_text(
                 encoding="utf-8"
             )
         )
-
     except Exception:
-
         if path == USERS_FILE:
             return []
 
@@ -114,7 +94,6 @@ def read_json(path):
 
 
 def save_json(path, data):
-
     path.write_text(
         json.dumps(
             data,
@@ -138,7 +117,6 @@ TEHRAN = timezone(
 
 
 def tehran_time():
-
     return datetime.now(
         timezone.utc
     ).astimezone(
@@ -152,41 +130,23 @@ def tehran_time():
 # PASSWORD
 # =========================================================
 
-def hash_password(
-    password: str,
-):
-
+def hash_password(password: str):
     password = str(password)
 
-    salt = secrets.token_hex(
-        16
-    )
+    salt = secrets.token_hex(16)
 
     digest = hashlib.pbkdf2_hmac(
-
         "sha256",
-
-        password.encode(
-            "utf-8"
-        ),
-
-        salt.encode(
-            "utf-8"
-        ),
-
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
         200000,
-
     ).hex()
-
 
     return (
         "$pbkdf2$"
-        +
-        salt
-        +
-        "$"
-        +
-        digest
+        + salt
+        + "$"
+        + digest
     )
 
 
@@ -194,54 +154,34 @@ def verify_password(
     password: str,
     hashed: str,
 ):
-
     try:
-
         if not hashed:
             return False
 
-
         parts = hashed.split("$")
-
 
         if len(parts) != 4:
             return False
 
-
         if parts[1] != "pbkdf2":
             return False
 
-
         salt = parts[2]
-
         old_digest = parts[3]
 
-
         new_digest = hashlib.pbkdf2_hmac(
-
             "sha256",
-
-            str(password).encode(
-                "utf-8"
-            ),
-
-            salt.encode(
-                "utf-8"
-            ),
-
+            str(password).encode("utf-8"),
+            salt.encode("utf-8"),
             200000,
-
         ).hex()
-
 
         return secrets.compare_digest(
             new_digest,
             old_digest,
         )
 
-
     except Exception:
-
         return False
 
 
@@ -251,7 +191,7 @@ def verify_password(
 
 app = FastAPI(
     title="GAPINO",
-    version="6.0",
+    version="7.0",
 )
 
 
@@ -261,22 +201,16 @@ app = FastAPI(
 
 SESSION_SECRET = os.getenv(
     "SESSION_SECRET",
-    "GAPINO-session-secret-change-this"
+    "GAPINO-session-secret-change-this",
 )
 
 
 app.add_middleware(
-
     SessionMiddleware,
-
     secret_key=SESSION_SECRET,
-
     session_cookie="gapino_session",
-
     https_only=True,
-
     same_site="none",
-
 )
 
 
@@ -285,14 +219,19 @@ app.add_middleware(
 # =========================================================
 
 app.add_middleware(
-
     CORSMiddleware,
 
     allow_origins=[
         "https://gapino3.onrender.com",
+        "http://gapino3.onrender.com",
+
         "http://localhost",
         "https://localhost",
+
         "capacitor://localhost",
+
+        "http://127.0.0.1",
+        "https://127.0.0.1",
     ],
 
     allow_credentials=True,
@@ -304,8 +243,142 @@ app.add_middleware(
     allow_headers=[
         "*"
     ],
-
 )
+
+
+# =========================================================
+# ACCESS TOKEN
+# =========================================================
+
+ACCESS_TOKEN_DAYS = 30
+
+
+def _b64_encode(value: bytes) -> str:
+    return (
+        base64.urlsafe_b64encode(value)
+        .decode("utf-8")
+        .rstrip("=")
+    )
+
+
+def _b64_decode(value: str) -> bytes:
+    padding = "=" * (-len(value) % 4)
+
+    return base64.urlsafe_b64decode(
+        value + padding
+    )
+
+
+def make_access_token(
+    user_id: str,
+) -> str:
+
+    payload = {
+        "user_id": str(user_id),
+        "exp": (
+            int(time.time())
+            +
+            ACCESS_TOKEN_DAYS
+            *
+            24
+            *
+            60
+            *
+            60
+        ),
+    }
+
+    raw = json.dumps(
+        payload,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+    encoded = _b64_encode(raw)
+
+    signature = hmac.new(
+        SESSION_SECRET.encode("utf-8"),
+        encoded.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
+
+    return (
+        encoded
+        +
+        "."
+        +
+        _b64_encode(signature)
+    )
+
+
+def verify_access_token(
+    token: str,
+):
+
+    try:
+        token = str(
+            token or ""
+        ).strip()
+
+        if not token:
+            return None
+
+        if "." not in token:
+            return None
+
+        encoded, signature = token.split(
+            ".",
+            1,
+        )
+
+        if not encoded or not signature:
+            return None
+
+        expected_signature = hmac.new(
+            SESSION_SECRET.encode("utf-8"),
+            encoded.encode("utf-8"),
+            hashlib.sha256,
+        ).digest()
+
+        provided_signature = _b64_decode(
+            signature
+        )
+
+        if not hmac.compare_digest(
+            expected_signature,
+            provided_signature,
+        ):
+            return None
+
+        payload = json.loads(
+            _b64_decode(
+                encoded
+            ).decode("utf-8")
+        )
+
+        exp = int(
+            payload.get(
+                "exp",
+                0,
+            )
+        )
+
+        if exp < int(time.time()):
+            return None
+
+        user_id = payload.get(
+            "user_id"
+        )
+
+        if not user_id:
+            return None
+
+        return find_user_by_id(
+            str(user_id)
+        )
+
+    except Exception:
+        return None
 
 
 # =========================================================
@@ -325,27 +398,22 @@ active_connections: Dict[
 def find_user_by_mobile(
     mobile: str,
 ):
-
     users = read_json(
         USERS_FILE
     )
 
-
     for user in users:
-
         if (
             str(
                 user.get(
                     "mobile",
-                    ""
+                    "",
                 )
             ).strip()
             ==
-            mobile
+            str(mobile).strip()
         ):
-
             return user
-
 
     return None
 
@@ -353,30 +421,26 @@ def find_user_by_mobile(
 def find_user_by_username(
     username: str,
 ):
-
     users = read_json(
         USERS_FILE
     )
 
-
-    username_lower = username.lower()
-
+    username_lower = str(
+        username
+    ).lower()
 
     for user in users:
-
         if (
             str(
                 user.get(
                     "username",
-                    ""
+                    "",
                 )
             ).lower()
             ==
             username_lower
         ):
-
             return user
-
 
     return None
 
@@ -384,86 +448,146 @@ def find_user_by_username(
 def find_user_by_id(
     user_id: str,
 ):
-
     users = read_json(
         USERS_FILE
     )
 
-
     for user in users:
-
         if (
             str(
                 user.get(
                     "id",
-                    ""
+                    "",
                 )
             )
             ==
             str(user_id)
         ):
-
             return user
-
 
     return None
 
 
 def public_user(
     user,
+    include_phone=True,
 ):
+    result = {
+        "id": user.get(
+            "id"
+        ),
 
-    return {
+        "username": user.get(
+            "username"
+        ),
 
-        "id":
-            user.get(
-                "id"
-            ),
+        "avatar": user.get(
+            "avatar",
+            "",
+        ),
 
-        "username":
-            user.get(
-                "username"
-            ),
+        "status": user.get(
+            "status",
+            "",
+        ),
 
-        "mobile":
-            user.get(
-                "mobile"
-            ),
-
-        "avatar":
-            user.get(
-                "avatar",
-                "",
-            ),
-
-        "status":
-            user.get(
-                "status",
-                "",
-            ),
-
-        "online":
-            user.get(
-                "id"
+        "online": (
+            str(
+                user.get(
+                    "id",
+                    "",
+                )
             )
-            in active_connections,
-
+            in active_connections
+        ),
     }
 
+    if include_phone:
+        result["mobile"] = user.get(
+            "mobile"
+        )
+
+    return result
+
+
+# =========================================================
+# CURRENT USER
+# =========================================================
 
 def current_user(
     request: Request,
 ):
+    # -----------------------------------------------------
+    # 1. Bearer Token
+    # -----------------------------------------------------
+
+    authorization = request.headers.get(
+        "Authorization",
+        "",
+    ).strip()
+
+    if authorization.lower().startswith(
+        "bearer "
+    ):
+        token = authorization[
+            7:
+        ].strip()
+
+        user = verify_access_token(
+            token
+        )
+
+        if user:
+            return user
+
+    # -----------------------------------------------------
+    # 2. Session fallback
+    # -----------------------------------------------------
 
     user_id = request.session.get(
         "user_id"
     )
 
+    if user_id:
+        return find_user_by_id(
+            user_id
+        )
 
-    if not user_id:
+    return None
 
-        return None
 
+# =========================================================
+# CURRENT USER FROM WEBSOCKET
+# =========================================================
+
+def websocket_user(
+    websocket: WebSocket,
+    user_id: str,
+):
+    # -----------------------------------------------------
+    # Token from query string
+    # /ws/{user_id}?token=...
+    # -----------------------------------------------------
+
+    token = websocket.query_params.get(
+        "token",
+        "",
+    ).strip()
+
+    if token:
+        user = verify_access_token(
+            token
+        )
+
+        if user:
+            if str(
+                user.get("id")
+            ) == str(user_id):
+                return user
+
+    # -----------------------------------------------------
+    # Fallback: find user by URL
+    # -----------------------------------------------------
 
     return find_user_by_id(
         user_id
@@ -478,19 +602,10 @@ def current_user(
 async def health():
 
     return {
-
-        "success":
-            True,
-
-        "server":
-            "GAPINO",
-
-        "time":
-            tehran_time(),
-
-        "auth":
-            "mobile_password",
-
+        "success": True,
+        "server": "GAPINO",
+        "time": tehran_time(),
+        "auth": "mobile_password",
     }
 
 
@@ -510,174 +625,118 @@ async def register(
 ):
 
     username = username.strip()
-
     mobile = mobile.strip()
-
     password = password.strip()
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # USERNAME
-    # =====================================================
+    # -----------------------------------------------------
 
     if len(username) < 3:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "نام کاربری باید حداقل ۳ کاراکتر باشد",
-
         }
-
 
     if len(username) > 30:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "نام کاربری بیش از حد طولانی است",
-
         }
 
-
     if not re.match(
-
         r"^[a-zA-Z0-9._-]+$",
-
         username,
-
     ):
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "نام کاربری نامعتبر است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # MOBILE
-    # =====================================================
+    # -----------------------------------------------------
 
     if not re.match(
-
         r"^09\d{9}$",
-
         mobile,
-
     ):
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "شماره موبایل اشتباه است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # PASSWORD
-    # =====================================================
+    # -----------------------------------------------------
 
     if len(password) < 6:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "رمز عبور باید حداقل ۶ کاراکتر باشد",
-
         }
-
 
     if len(password) > 128:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "رمز عبور بیش از حد طولانی است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # READ USERS
-    # =====================================================
+    # -----------------------------------------------------
 
     users = read_json(
         USERS_FILE
     )
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # DUPLICATE CHECK
-    # =====================================================
+    # -----------------------------------------------------
 
     for existing_user in users:
 
         existing_username = str(
             existing_user.get(
                 "username",
-                ""
+                "",
             )
         ).lower()
-
 
         existing_mobile = str(
             existing_user.get(
                 "mobile",
-                ""
+                "",
             )
         )
 
-
-        if existing_username == username.lower():
-
+        if (
+            existing_username
+            ==
+            username.lower()
+        ):
             return {
-
-                "success":
-                    False,
-
+                "success": False,
                 "message":
                     "این نام کاربری قبلاً ثبت شده است",
-
             }
-
 
         if existing_mobile == mobile:
-
             return {
-
-                "success":
-                    False,
-
+                "success": False,
                 "message":
                     "این شماره موبایل قبلاً ثبت شده است",
-
             }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # CREATE USER
-    # =====================================================
+    # -----------------------------------------------------
 
     user = {
 
@@ -708,20 +767,18 @@ async def register(
 
     }
 
-
     users.append(
         user
     )
 
-
     save_json(
-
         USERS_FILE,
-
         users,
-
     )
 
+    # -----------------------------------------------------
+    # RETURN
+    # -----------------------------------------------------
 
     return {
 
@@ -733,7 +790,8 @@ async def register(
 
         "user":
             public_user(
-                user
+                user,
+                include_phone=True,
             ),
 
     }
@@ -755,114 +813,92 @@ async def login(
 ):
 
     mobile = mobile.strip()
-
     password = password.strip()
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # VALIDATE MOBILE
-    # =====================================================
+    # -----------------------------------------------------
 
     if not re.match(
-
         r"^09\d{9}$",
-
         mobile,
-
     ):
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "شماره موبایل اشتباه است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # VALIDATE PASSWORD
-    # =====================================================
+    # -----------------------------------------------------
 
     if not password:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "رمز عبور را وارد کنید",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # FIND USER
-    # =====================================================
+    # -----------------------------------------------------
 
     user = find_user_by_mobile(
         mobile
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "شماره موبایل یا رمز عبور اشتباه است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # VERIFY PASSWORD
-    # =====================================================
+    # -----------------------------------------------------
 
     if not verify_password(
-
         password,
-
         user.get(
             "password",
-            ""
+            "",
         ),
-
     ):
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "شماره موبایل یا رمز عبور اشتباه است",
-
         }
 
-
-    # =====================================================
+    # -----------------------------------------------------
     # CREATE SESSION
-    # =====================================================
+    # -----------------------------------------------------
 
     request.session.clear()
-
 
     request.session[
         "user_id"
     ] = user["id"]
 
-
     request.session[
         "logged_in"
     ] = True
 
+    # -----------------------------------------------------
+    # CREATE ACCESS TOKEN
+    # -----------------------------------------------------
+
+    token = make_access_token(
+        str(
+            user["id"]
+        )
+    )
+
+    # -----------------------------------------------------
+    # RETURN
+    # -----------------------------------------------------
 
     return {
 
@@ -872,9 +908,13 @@ async def login(
         "message":
             "ورود موفق",
 
+        "token":
+            token,
+
         "user":
             public_user(
-                user
+                user,
+                include_phone=True,
             ),
 
     }
@@ -893,19 +933,12 @@ async def me(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "وارد حساب نشده‌اید",
-
         }
-
 
     return {
 
@@ -914,7 +947,8 @@ async def me(
 
         "user":
             public_user(
-                user
+                user,
+                include_phone=True,
             ),
 
     }
@@ -931,15 +965,10 @@ async def logout(
 
     request.session.clear()
 
-
     return {
-
-        "success":
-            True,
-
+        "success": True,
         "message":
             "با موفقیت خارج شدید",
-
     }
 
 
@@ -956,41 +985,32 @@ async def users(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "ابتدا وارد شوید",
-
-            "users":
-                [],
-
+            "users": [],
         }
-
 
     all_users = read_json(
         USERS_FILE
     )
 
+    result = []
+
+    for item in all_users:
+
+        result.append(
+            public_user(
+                item,
+                include_phone=True,
+            )
+        )
 
     return {
-
-        "success":
-            True,
-
-        "users":
-            [
-                public_user(
-                    item
-                )
-                for item in all_users
-            ],
-
+        "success": True,
+        "users": result,
     }
 
 
@@ -1007,30 +1027,21 @@ async def get_messages(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "ابتدا وارد شوید",
-
-            "messages":
-                [],
-
+            "messages": [],
         }
-
 
     data = read_json(
         MESSAGES_FILE
     )
 
-
-    user_id = user["id"]
-
+    user_id = str(
+        user["id"]
+    )
 
     visible_messages = [
 
@@ -1039,14 +1050,20 @@ async def get_messages(
         for message in data
 
         if (
-            message.get(
-                "sender_id"
+            str(
+                message.get(
+                    "sender_id",
+                    "",
+                )
             )
             ==
             user_id
             or
-            message.get(
-                "receiver_id"
+            str(
+                message.get(
+                    "receiver_id",
+                    "",
+                )
             )
             ==
             user_id
@@ -1054,23 +1071,20 @@ async def get_messages(
 
     ]
 
-
     return {
-
-        "success":
-            True,
-
+        "success": True,
         "messages":
             visible_messages,
-
     }
 
 
 # =========================================================
-# GET CHAT MESSAGES
+# GET CHAT MESSAGES - ORIGINAL ROUTE
 # =========================================================
 
-@app.get("/messages/{other_user_id}")
+@app.get(
+    "/messages/{other_user_id}"
+)
 async def get_chat_messages(
 
     request: Request,
@@ -1083,51 +1097,37 @@ async def get_chat_messages(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "ابتدا وارد شوید",
-
-            "messages":
-                [],
-
+            "messages": [],
         }
-
 
     other_user = find_user_by_id(
         other_user_id
     )
 
-
     if not other_user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "کاربر پیدا نشد",
-
-            "messages":
-                [],
-
+            "messages": [],
         }
-
 
     data = read_json(
         MESSAGES_FILE
     )
 
+    current_id = str(
+        user["id"]
+    )
 
-    current_id = user["id"]
-
+    other_id = str(
+        other_user_id
+    )
 
     messages = [
 
@@ -1138,55 +1138,191 @@ async def get_chat_messages(
         if (
 
             (
-                message.get(
-                    "sender_id"
+                str(
+                    message.get(
+                        "sender_id",
+                        "",
+                    )
                 )
                 ==
                 current_id
 
                 and
 
-                message.get(
-                    "receiver_id"
+                str(
+                    message.get(
+                        "receiver_id",
+                        "",
+                    )
                 )
                 ==
-                other_user_id
-
+                other_id
             )
 
             or
 
             (
-
-                message.get(
-                    "sender_id"
+                str(
+                    message.get(
+                        "sender_id",
+                        "",
+                    )
                 )
                 ==
-                other_user_id
+                other_id
 
                 and
 
-                message.get(
-                    "receiver_id"
+                str(
+                    message.get(
+                        "receiver_id",
+                        "",
+                    )
                 )
                 ==
                 current_id
-
             )
 
         )
 
     ]
 
-
     return {
-
-        "success":
-            True,
-
+        "success": True,
         "messages":
             messages,
+    }
 
+
+# =========================================================
+# GET CHAT MESSAGES - TOKEN CHAT ROUTE
+# =========================================================
+
+@app.get(
+    "/messages/{current_user_id}/{other_user_id}"
+)
+async def get_chat_messages_compat(
+
+    request: Request,
+
+    current_user_id: str,
+
+    other_user_id: str,
+
+):
+
+    user = current_user(
+        request
+    )
+
+    if not user:
+        return {
+            "success": False,
+            "message":
+                "ابتدا وارد شوید",
+            "messages": [],
+        }
+
+    # -----------------------------------------------------
+    # Security: URL current user must match logged-in user
+    # -----------------------------------------------------
+
+    if str(
+        user.get("id")
+    ) != str(current_user_id):
+        return {
+            "success": False,
+            "message":
+                "دسترسی غیرمجاز",
+            "messages": [],
+        }
+
+    other_user = find_user_by_id(
+        other_user_id
+    )
+
+    if not other_user:
+        return {
+            "success": False,
+            "message":
+                "کاربر پیدا نشد",
+            "messages": [],
+        }
+
+    data = read_json(
+        MESSAGES_FILE
+    )
+
+    current_id = str(
+        user["id"]
+    )
+
+    other_id = str(
+        other_user_id
+    )
+
+    messages = [
+
+        message
+
+        for message in data
+
+        if (
+
+            (
+                str(
+                    message.get(
+                        "sender_id",
+                        "",
+                    )
+                )
+                ==
+                current_id
+
+                and
+
+                str(
+                    message.get(
+                        "receiver_id",
+                        "",
+                    )
+                )
+                ==
+                other_id
+            )
+
+            or
+
+            (
+                str(
+                    message.get(
+                        "sender_id",
+                        "",
+                    )
+                )
+                ==
+                other_id
+
+                and
+
+                str(
+                    message.get(
+                        "receiver_id",
+                        "",
+                    )
+                )
+                ==
+                current_id
+            )
+
+        )
+
+    ]
+
+    return {
+        "success": True,
+        "messages":
+            messages,
     }
 
 
@@ -1209,58 +1345,36 @@ async def send_message(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "ابتدا وارد شوید",
-
         }
-
 
     text = text.strip()
 
-
     if not text:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "متن پیام خالی است",
-
         }
-
 
     receiver = find_user_by_id(
         receiver_id
     )
 
-
     if not receiver:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "گیرنده پیدا نشد",
-
         }
-
 
     messages_data = read_json(
         MESSAGES_FILE
     )
-
 
     message = {
 
@@ -1270,10 +1384,14 @@ async def send_message(
             ),
 
         "sender_id":
-            user["id"],
+            str(
+                user["id"]
+            ),
 
         "receiver_id":
-            receiver_id,
+            str(
+                receiver_id
+            ),
 
         "text":
             text,
@@ -1292,55 +1410,39 @@ async def send_message(
 
     }
 
-
     messages_data.append(
         message
     )
 
-
     save_json(
-
         MESSAGES_FILE,
-
         messages_data,
-
     )
-
 
     receiver_ws = (
         active_connections.get(
-            receiver_id
+            str(
+                receiver_id
+            )
         )
     )
 
-
     if receiver_ws:
-
         try:
-
             await receiver_ws.send_json({
-
                 "type":
                     "message",
 
                 "message":
                     message,
-
             })
-
         except Exception:
-
             pass
 
-
     return {
-
-        "success":
-            True,
-
+        "success": True,
         "message":
             message,
-
     }
 
 
@@ -1348,7 +1450,9 @@ async def send_message(
 # UPLOAD
 # =========================================================
 
-MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+MAX_UPLOAD_SIZE = (
+    10 * 1024 * 1024
+)
 
 
 ALLOWED_EXTENSIONS = {
@@ -1366,9 +1470,7 @@ ALLOWED_EXTENSIONS = {
     ".m4a",
 
     ".pdf",
-
     ".txt",
-
     ".zip",
 
 }
@@ -1387,77 +1489,50 @@ async def upload_file(
         request
     )
 
-
     if not user:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "ابتدا وارد شوید",
-
         }
-
 
     if not file.filename:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "فایلی انتخاب نشده است",
-
         }
-
 
     original_name = Path(
         file.filename
     ).name
 
-
     extension = Path(
         original_name
     ).suffix.lower()
 
-
     if extension not in ALLOWED_EXTENSIONS:
-
         return {
-
-            "success":
-                False,
-
+            "success": False,
             "message":
                 "نوع فایل مجاز نیست",
-
         }
 
-
     unique_name = (
-
         str(
             uuid.uuid4()
         )
-
         +
-
         extension
-
     )
 
-
     destination = (
-        UPLOAD_DIR /
+        UPLOAD_DIR
+        /
         unique_name
     )
 
-
     total_size = 0
-
 
     try:
 
@@ -1471,72 +1546,57 @@ async def upload_file(
                     1024 * 1024
                 )
 
-
                 if not chunk:
-
                     break
-
 
                 total_size += len(
                     chunk
                 )
 
-
-                if total_size > MAX_UPLOAD_SIZE:
+                if (
+                    total_size
+                    >
+                    MAX_UPLOAD_SIZE
+                ):
 
                     buffer.close()
 
-
                     if destination.exists():
-
                         destination.unlink()
 
-
                     return {
-
                         "success":
                             False,
 
                         "message":
                             "حجم فایل نباید بیشتر از ۱۰ مگابایت باشد",
-
                     }
-
 
                 buffer.write(
                     chunk
                 )
-
 
     except Exception as e:
 
         if destination.exists():
 
             try:
-
                 destination.unlink()
-
             except Exception:
-
                 pass
-
 
         print(
             "UPLOAD ERROR:",
             e,
         )
 
-
         return {
-
             "success":
                 False,
 
             "message":
                 "آپلود فایل ناموفق بود",
-
         }
-
 
     return {
 
@@ -1547,7 +1607,8 @@ async def upload_file(
             "فایل با موفقیت آپلود شد",
 
         "url":
-            "/uploads/" +
+            "/uploads/"
+            +
             unique_name,
 
         "filename":
@@ -1557,7 +1618,9 @@ async def upload_file(
             total_size,
 
         "type":
-            file.content_type or "",
+            file.content_type
+            or
+            "",
 
     }
 
@@ -1566,7 +1629,9 @@ async def upload_file(
 # SERVE UPLOADS
 # =========================================================
 
-@app.get("/uploads/{file_name:path}")
+@app.get(
+    "/uploads/{file_name:path}"
+)
 async def get_uploaded_file(
     file_name: str,
 ):
@@ -1575,20 +1640,17 @@ async def get_uploaded_file(
         file_name
     ).name
 
-
     file = (
-        UPLOAD_DIR /
+        UPLOAD_DIR
+        /
         safe_name
     )
 
-
     if not file.exists():
-
         raise HTTPException(
             status_code=404,
             detail="File not found",
         )
-
 
     return FileResponse(
         file
@@ -1599,7 +1661,9 @@ async def get_uploaded_file(
 # WEBSOCKET
 # =========================================================
 
-@app.websocket("/ws/{user_id}")
+@app.websocket(
+    "/ws/{user_id}"
+)
 async def websocket_endpoint(
 
     websocket: WebSocket,
@@ -1608,25 +1672,40 @@ async def websocket_endpoint(
 
 ):
 
-    user = find_user_by_id(
-        user_id
+    user = websocket_user(
+        websocket,
+        user_id,
     )
 
-
     if not user:
-
-        await websocket.close()
-
+        await websocket.close(
+            code=1008
+        )
         return
 
+    # -----------------------------------------------------
+    # Security
+    # -----------------------------------------------------
+
+    if str(
+        user.get("id")
+    ) != str(user_id):
+
+        await websocket.close(
+            code=1008
+        )
+        return
 
     await websocket.accept()
 
-
     active_connections[
-        user_id
+        str(user_id)
     ] = websocket
 
+    print(
+        "WEBSOCKET CONNECTED:",
+        user_id,
+    )
 
     try:
 
@@ -1634,11 +1713,9 @@ async def websocket_endpoint(
 
             data = await websocket.receive_json()
 
-
             message_type = data.get(
                 "type"
             )
-
 
             # =================================================
             # PING
@@ -1656,7 +1733,6 @@ async def websocket_endpoint(
 
                 })
 
-
             # =================================================
             # TYPING
             # =================================================
@@ -1667,13 +1743,14 @@ async def websocket_endpoint(
                     "receiver_id"
                 )
 
+                if not receiver_id:
+                    continue
 
                 receiver_ws = (
                     active_connections.get(
-                        receiver_id
+                        str(receiver_id)
                     )
                 )
-
 
                 if receiver_ws:
 
@@ -1685,14 +1762,12 @@ async def websocket_endpoint(
                                 "typing",
 
                             "user_id":
-                                user_id,
+                                str(user_id),
 
                         })
 
                     except Exception:
-
                         pass
-
 
             # =================================================
             # MESSAGE
@@ -1704,7 +1779,6 @@ async def websocket_endpoint(
                     "receiver_id"
                 )
 
-
                 text = str(
                     data.get(
                         "text",
@@ -1712,46 +1786,34 @@ async def websocket_endpoint(
                     )
                 ).strip()
 
-
                 file_url = data.get(
                     "file"
                 )
-
 
                 file_type = data.get(
                     "file_type"
                 )
 
-
                 reply_to = data.get(
                     "reply_to"
                 )
 
-
                 if not receiver_id:
-
                     continue
-
 
                 receiver = find_user_by_id(
                     receiver_id
                 )
 
-
                 if not receiver:
-
                     continue
-
 
                 if not text and not file_url:
-
                     continue
-
 
                 messages_data = read_json(
                     MESSAGES_FILE
                 )
-
 
                 message = {
 
@@ -1761,19 +1823,23 @@ async def websocket_endpoint(
                         ),
 
                     "sender_id":
-                        user_id,
+                        str(user_id),
 
                     "receiver_id":
-                        receiver_id,
+                        str(receiver_id),
 
                     "text":
                         text,
 
                     "file":
-                        file_url or "",
+                        file_url
+                        or
+                        "",
 
                     "file_type":
-                        file_type or "",
+                        file_type
+                        or
+                        "",
 
                     "reply_to":
                         reply_to,
@@ -1792,27 +1858,20 @@ async def websocket_endpoint(
 
                 }
 
-
                 messages_data.append(
                     message
                 )
 
-
                 save_json(
-
                     MESSAGES_FILE,
-
                     messages_data,
-
                 )
-
 
                 receiver_ws = (
                     active_connections.get(
-                        receiver_id
+                        str(receiver_id)
                     )
                 )
-
 
                 if receiver_ws:
 
@@ -1829,9 +1888,7 @@ async def websocket_endpoint(
                         })
 
                     except Exception:
-
                         pass
-
 
                 await websocket.send_json({
 
@@ -1843,11 +1900,12 @@ async def websocket_endpoint(
 
                 })
 
-
     except WebSocketDisconnect:
 
-        pass
-
+        print(
+            "WEBSOCKET DISCONNECTED:",
+            user_id,
+        )
 
     except Exception as e:
 
@@ -1856,21 +1914,17 @@ async def websocket_endpoint(
             e,
         )
 
-
     finally:
 
         if (
-
             active_connections.get(
-                user_id
+                str(user_id)
             )
-
             is websocket
-
         ):
 
             del active_connections[
-                user_id
+                str(user_id)
             ]
 
 
@@ -1878,7 +1932,9 @@ async def websocket_endpoint(
 # ONLINE USERS
 # =========================================================
 
-@app.get("/online-users")
+@app.get(
+    "/online-users"
+)
 async def online_users(
     request: Request,
 ):
@@ -1887,22 +1943,16 @@ async def online_users(
         request
     )
 
-
     if not user:
-
         return {
-
             "success":
                 False,
 
             "users":
                 [],
-
         }
 
-
     return {
-
         "success":
             True,
 
@@ -1910,7 +1960,6 @@ async def online_users(
             list(
                 active_connections.keys()
             ),
-
     }
 
 
@@ -1940,17 +1989,15 @@ async def get_time():
 async def root():
 
     index_file = (
-        FRONTEND_DIR /
+        FRONTEND_DIR
+        /
         "index.html"
     )
 
-
     if index_file.exists():
-
         return FileResponse(
             index_file
         )
-
 
     return {
 
@@ -1974,17 +2021,15 @@ async def root():
 async def chat_html():
 
     file = (
-        FRONTEND_DIR /
+        FRONTEND_DIR
+        /
         "chat.html"
     )
 
-
     if file.exists():
-
         return FileResponse(
             file
         )
-
 
     raise HTTPException(
         status_code=404,
@@ -2000,17 +2045,15 @@ async def chat_html():
 async def login_html():
 
     file = (
-        FRONTEND_DIR /
+        FRONTEND_DIR
+        /
         "login.html"
     )
 
-
     if file.exists():
-
         return FileResponse(
             file
         )
-
 
     raise HTTPException(
         status_code=404,
@@ -2026,17 +2069,15 @@ async def login_html():
 async def register_html():
 
     file = (
-        FRONTEND_DIR /
+        FRONTEND_DIR
+        /
         "register.html"
     )
 
-
     if file.exists():
-
         return FileResponse(
             file
         )
-
 
     raise HTTPException(
         status_code=404,
@@ -2048,24 +2089,24 @@ async def register_html():
 # FRONTEND STATIC FILES
 # =========================================================
 
-@app.get("/frontend/{file_name:path}")
+@app.get(
+    "/frontend/{file_name:path}"
+)
 async def frontend_file(
     file_name: str,
 ):
 
     file = (
-        FRONTEND_DIR /
+        FRONTEND_DIR
+        /
         file_name
     )
 
-
     if not file.exists():
-
         raise HTTPException(
             status_code=404,
             detail="File not found",
         )
-
 
     return FileResponse(
         file
@@ -2079,7 +2120,6 @@ async def frontend_file(
 if __name__ == "__main__":
 
     import uvicorn
-
 
     uvicorn.run(
 
