@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
@@ -5,226 +6,257 @@
 
 <meta charset="UTF-8">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-<title>
-ساخت حساب GAPINO
-</title>
-
+<title>ساخت حساب GAPINO</title>
 
 <style>
 
 *{
-box-sizing:border-box;
+    box-sizing:border-box;
 }
 
+html,
+body{
+    width:100%;
+    min-height:100%;
+    margin:0;
+}
 
 body{
 
-margin:0;
+    min-height:100vh;
 
-min-height:100vh;
+    display:flex;
 
-display:flex;
+    align-items:center;
 
-align-items:center;
+    justify-content:center;
 
-justify-content:center;
+    background:
+    linear-gradient(
+        135deg,
+        #edf4ff,
+        #dce8ff
+    );
 
-background:
-linear-gradient(
-135deg,
-#edf4ff,
-#dce8ff
-);
+    font-family:
+    Tahoma,
+    Arial,
+    sans-serif;
 
-font-family:
-Tahoma,
-Arial;
-
-padding:20px;
+    padding:20px;
 
 }
-
-
 
 .box{
 
-width:100%;
+    width:100%;
 
-max-width:420px;
+    max-width:420px;
 
-background:white;
+    background:#fff;
 
-padding:30px;
+    padding:30px;
 
-border-radius:24px;
+    border-radius:24px;
 
-box-shadow:
-0 20px 60px
-rgba(0,0,0,.12);
+    box-shadow:
+    0 20px 60px
+    rgba(0,0,0,.12);
 
 }
-
-
 
 .logo{
 
-width:80px;
+    width:80px;
 
-height:80px;
+    height:80px;
 
-margin:auto;
+    margin:0 auto;
 
-border-radius:20px;
+    border-radius:20px;
 
-background:
-linear-gradient(
-135deg,
-#4f7cff,
-#315bdc
-);
+    background:
+    linear-gradient(
+        135deg,
+        #4f7cff,
+        #315bdc
+    );
 
-color:white;
+    color:#fff;
 
-display:flex;
+    display:flex;
 
-align-items:center;
+    align-items:center;
 
-justify-content:center;
+    justify-content:center;
 
-font-size:28px;
+    font-size:28px;
 
-font-weight:bold;
+    font-weight:bold;
 
 }
-
-
 
 h1{
 
-text-align:center;
+    text-align:center;
 
-color:#1d2940;
+    color:#1d2940;
+
+    margin:
+    20px 0 15px;
 
 }
-
-
 
 input{
 
-width:100%;
+    width:100%;
 
-height:52px;
+    height:52px;
 
-margin-top:12px;
+    margin-top:12px;
 
-border:
+    border:
+    1px solid #dce2ed;
 
-1px solid #dce2ed;
+    border-radius:14px;
 
-border-radius:14px;
+    padding:
+    0 15px;
 
-padding:0 15px;
+    font-size:16px;
 
-font-size:16px;
+    outline:none;
+
+    direction:ltr;
+
+    text-align:left;
 
 }
 
+input:focus{
 
+    border-color:#4f7cff;
+
+}
 
 button{
 
-width:100%;
+    width:100%;
 
-height:52px;
+    height:52px;
 
-margin-top:15px;
+    margin-top:15px;
 
-border:0;
+    border:0;
 
-border-radius:14px;
+    border-radius:14px;
 
-background:
-linear-gradient(
-135deg,
-#4f7cff,
-#315bdc
-);
+    background:
+    linear-gradient(
+        135deg,
+        #4f7cff,
+        #315bdc
+    );
 
-color:white;
+    color:#fff;
 
-font-size:16px;
+    font-size:16px;
 
-font-weight:bold;
+    font-weight:bold;
 
-cursor:pointer;
+    cursor:pointer;
 
 }
 
+button:active{
 
+    transform:scale(.99);
+
+}
 
 button:disabled{
 
-opacity:.6;
+    opacity:.6;
+
+    cursor:not-allowed;
 
 }
-
-
 
 .message{
 
-text-align:center;
+    text-align:center;
 
-margin-top:15px;
+    margin-top:15px;
 
-line-height:1.8;
+    line-height:1.8;
+
+    min-height:30px;
+
+    font-size:14px;
 
 }
-
-
 
 .error{
-
-color:#d33;
-
+    color:#d33;
 }
-
-
 
 .success{
-
-color:#198754;
-
+    color:#198754;
 }
-
-
-
-.hide{
-
-display:none;
-
-}
-
-
 
 a{
 
-display:block;
+    display:block;
 
-text-align:center;
+    text-align:center;
 
-margin-top:20px;
+    margin-top:20px;
 
-color:#315bdc;
+    color:#315bdc;
 
-text-decoration:none;
+    text-decoration:none;
+
+    font-size:14px;
 
 }
 
+.hint{
+
+    font-size:12px;
+
+    color:#777;
+
+    margin-top:8px;
+
+    line-height:1.7;
+
+}
+
+@media(max-width:480px){
+
+    body{
+        padding:14px;
+    }
+
+    .box{
+        padding:24px 18px;
+        border-radius:20px;
+    }
+
+    .logo{
+        width:72px;
+        height:72px;
+        font-size:25px;
+    }
+
+    h1{
+        font-size:22px;
+    }
+
+}
 
 </style>
 
@@ -233,507 +265,464 @@ text-decoration:none;
 
 <body>
 
-
 <div class="box">
 
+    <div class="logo">
+        GAP
+    </div>
 
-<div class="logo">
-GAP
-</div>
-
-
-
-<h1>
-ساخت حساب GAPINO
-</h1>
+    <h1>
+        ساخت حساب GAPINO
+    </h1>
 
 
+    <input
+        id="username"
+        type="text"
+        autocomplete="username"
+        maxlength="30"
+        placeholder="نام کاربری"
+    >
 
-<input
-
-id="username"
-
-placeholder="نام کاربری"
-
->
-
-
-
-<input
-
-id="mobile"
-
-placeholder="09120000000"
-
->
+    <div class="hint">
+        فقط حروف انگلیسی، عدد، نقطه، خط تیره و زیرخط مجاز است.
+    </div>
 
 
-
-<button id="sendCode">
-
-ارسال کد
-
-</button>
-
-
-
-
-<div id="codeBox" class="hide">
+    <input
+        id="mobile"
+        type="tel"
+        inputmode="numeric"
+        maxlength="11"
+        autocomplete="tel"
+        placeholder="09120000000"
+    >
 
 
-<input
+    <input
+        id="password"
+        type="password"
+        autocomplete="new-password"
+        maxlength="128"
+        placeholder="رمز عبور"
+    >
 
-id="code"
-
-placeholder="کد ۶ رقمی"
-
->
-
-
-
-<button id="verifyCode">
-
-تایید کد و ساخت حساب
-
-</button>
+    <div class="hint">
+        رمز عبور باید حداقل ۶ کاراکتر باشد.
+    </div>
 
 
-
-</div>
-
-
-
-
-<div
-
-id="message"
-
-class="message"
-
-></div>
+    <input
+        id="password2"
+        type="password"
+        autocomplete="new-password"
+        maxlength="128"
+        placeholder="تکرار رمز عبور"
+    >
 
 
+    <button
+        id="registerButton"
+        type="button"
+    >
+        ساخت حساب
+    </button>
 
 
-<a href="login.html">
+    <div
+        id="message"
+        class="message"
+    ></div>
 
-ورود به حساب
 
-</a>
-
+    <a href="login.html">
+        قبلاً حساب ساخته‌ام
+    </a>
 
 </div>
-
-
-
 
 
 <script>
 
-
 const API =
-"";
-
+    "https://gapino3.onrender.com";
 
 
 const username =
-document.getElementById(
-"username"
-);
-
+    document.getElementById("username");
 
 const mobile =
-document.getElementById(
-"mobile"
-);
+    document.getElementById("mobile");
 
+const password =
+    document.getElementById("password");
 
-const code =
-document.getElementById(
-"code"
-);
+const password2 =
+    document.getElementById("password2");
 
-
-const sendButton =
-document.getElementById(
-"sendCode"
-);
-
-
-const verifyButton =
-document.getElementById(
-"verifyCode"
-);
-
-
-const codeBox =
-document.getElementById(
-"codeBox"
-);
-
+const registerButton =
+    document.getElementById("registerButton");
 
 const message =
-document.getElementById(
-"message"
-);
-
-
-
+    document.getElementById("message");
 
 
 function showMessage(
-text,
-type=""
+    text,
+    type = ""
 ){
 
-message.textContent =
-text;
+    message.textContent =
+        text;
 
-message.className =
-"message " + type;
+    message.className =
+        "message " + type;
+}
+
+
+function normalizePhone(
+    value
+){
+
+    let phone =
+        value
+        .trim()
+        .replace(/\s+/g, "");
+
+
+    if(
+        phone.startsWith("+98")
+    ){
+
+        phone =
+            "0" +
+            phone.slice(3);
+
+    }
+
+    else if(
+        phone.startsWith("98")
+    ){
+
+        phone =
+            "0" +
+            phone.slice(2);
+
+    }
+
+
+    return phone;
+}
+
+
+async function register(){
+
+    const user =
+        username.value.trim();
+
+    const phone =
+        normalizePhone(
+            mobile.value
+        );
+
+    const pass =
+        password.value;
+
+    const pass2 =
+        password2.value;
+
+
+    if(
+        user.length < 3
+    ){
+
+        showMessage(
+            "نام کاربری باید حداقل ۳ کاراکتر باشد",
+            "error"
+        );
+
+        username.focus();
+
+        return;
+    }
+
+
+    if(
+        !/^[a-zA-Z0-9._-]+$/.test(user)
+    ){
+
+        showMessage(
+            "نام کاربری نامعتبر است",
+            "error"
+        );
+
+        username.focus();
+
+        return;
+    }
+
+
+    if(
+        !/^09\d{9}$/.test(phone)
+    ){
+
+        showMessage(
+            "شماره موبایل اشتباه است",
+            "error"
+        );
+
+        mobile.focus();
+
+        return;
+    }
+
+
+    if(
+        pass.length < 6
+    ){
+
+        showMessage(
+            "رمز عبور باید حداقل ۶ کاراکتر باشد",
+            "error"
+        );
+
+        password.focus();
+
+        return;
+    }
+
+
+    if(
+        pass !== pass2
+    ){
+
+        showMessage(
+            "تکرار رمز عبور صحیح نیست",
+            "error"
+        );
+
+        password2.focus();
+
+        return;
+    }
+
+
+    registerButton.disabled =
+        true;
+
+
+    showMessage(
+        "در حال ساخت حساب...",
+        ""
+    );
+
+
+    const form =
+        new FormData();
+
+
+    form.append(
+        "username",
+        user
+    );
+
+
+    form.append(
+        "mobile",
+        phone
+    );
+
+
+    form.append(
+        "password",
+        pass
+    );
+
+
+    try{
+
+        const controller =
+            new AbortController();
+
+
+        const timeout =
+            setTimeout(
+                () => controller.abort(),
+                20000
+            );
+
+
+        const response =
+            await fetch(
+                API + "/register",
+                {
+                    method:"POST",
+
+                    body:form,
+
+                    cache:"no-store",
+
+                    credentials:"include",
+
+                    signal:
+                        controller.signal
+                }
+            );
+
+
+        clearTimeout(
+            timeout
+        );
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            !data.success
+        ){
+
+            registerButton.disabled =
+                false;
+
+
+            showMessage(
+                data.message ||
+                "ساخت حساب ناموفق بود",
+                "error"
+            );
+
+            return;
+        }
+
+
+        showMessage(
+            "حساب با موفقیت ساخته شد",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "login.html";
+
+            },
+            800
+        );
+
+
+    }
+
+    catch(error){
+
+        console.error(
+            "REGISTER ERROR:",
+            error
+        );
+
+
+        registerButton.disabled =
+            false;
+
+
+        if(
+            error.name === "AbortError"
+        ){
+
+            showMessage(
+                "زمان اتصال به سرور تمام شد",
+                "error"
+            );
+
+        }
+
+        else{
+
+            showMessage(
+                "خطا در ارتباط با سرور",
+                "error"
+            );
+
+        }
+
+    }
 
 }
 
 
+registerButton.onclick =
+    register;
 
 
+username.addEventListener(
+    "keydown",
+    (event) => {
 
+        if(
+            event.key === "Enter"
+        ){
 
+            mobile.focus();
 
-// =======================
-// SEND CODE
-// =======================
+        }
 
-
-sendButton.onclick =
-async ()=>{
-
-
-let phone =
-mobile.value.trim();
-
-
-
-if(!/^09\d{9}$/.test(phone)){
-
-
-showMessage(
-"شماره موبایل اشتباه است",
-"error"
-);
-
-return;
-
-}
-
-
-
-sendButton.disabled=true;
-
-
-
-const form =
-new FormData();
-
-
-form.append(
-"mobile",
-phone
+    }
 );
 
 
+mobile.addEventListener(
+    "keydown",
+    (event) => {
 
-try{
+        if(
+            event.key === "Enter"
+        ){
 
+            password.focus();
 
-const res =
-await fetch(
+        }
 
-API+"/send-code",
-
-{
-
-method:"POST",
-
-body:form
-
-}
-
+    }
 );
 
 
+password.addEventListener(
+    "keydown",
+    (event) => {
 
-const data =
-await res.json();
+        if(
+            event.key === "Enter"
+        ){
 
+            password2.focus();
 
+        }
 
-if(data.success){
-
-
-showMessage(
-"کد ارسال شد",
-"success"
+    }
 );
 
 
-codeBox.classList.remove(
-"hide"
+password2.addEventListener(
+    "keydown",
+    (event) => {
+
+        if(
+            event.key === "Enter"
+        ){
+
+            register();
+
+        }
+
+    }
 );
-
-
-
-}
-
-else{
-
-
-showMessage(
-data.message,
-"error"
-);
-
-
-}
-
-
-
-}catch(e){
-
-
-showMessage(
-"خطا در ارتباط با سرور",
-"error"
-);
-
-
-}
-
-
-
-sendButton.disabled=false;
-
-
-};
-
-
-
-
-
-
-
-
-
-// =======================
-// VERIFY + REGISTER
-// =======================
-
-
-verifyButton.onclick =
-async ()=>{
-
-
-let phone =
-mobile.value.trim();
-
-
-let otp =
-code.value.trim();
-
-
-
-if(!otp){
-
-
-showMessage(
-"کد را وارد کنید",
-"error"
-);
-
-
-return;
-
-}
-
-
-
-
-// VERIFY
-
-
-let verifyForm =
-new FormData();
-
-
-verifyForm.append(
-"mobile",
-phone
-);
-
-
-verifyForm.append(
-"code",
-otp
-);
-
-
-
-try{
-
-
-let verify =
-await fetch(
-
-API+"/verify-code",
-
-{
-
-method:"POST",
-
-body:verifyForm
-
-}
-
-);
-
-
-
-let verifyData =
-await verify.json();
-
-
-
-if(!verifyData.success){
-
-
-showMessage(
-verifyData.message,
-"error"
-);
-
-
-return;
-
-}
-
-
-
-
-
-// REGISTER
-
-
-let registerForm =
-new FormData();
-
-
-registerForm.append(
-
-"username",
-
-username.value.trim()
-
-);
-
-
-
-registerForm.append(
-
-"mobile",
-
-phone
-
-);
-
-
-
-
-
-let register =
-await fetch(
-
-API+"/register",
-
-{
-
-method:"POST",
-
-body:registerForm
-
-}
-
-);
-
-
-
-
-let registerData =
-await register.json();
-
-
-
-
-
-if(registerData.success){
-
-
-showMessage(
-
-"حساب ساخته شد. انتقال به ورود...",
-
-"success"
-
-);
-
-
-
-setTimeout(()=>{
-
-
-location.href =
-"login.html";
-
-
-},1000);
-
-
-
-}else{
-
-
-showMessage(
-
-registerData.message,
-
-"error"
-
-);
-
-
-}
-
-
-
-}catch(e){
-
-
-showMessage(
-"خطای سرور",
-"error"
-);
-
-
-}
-
-
-
-};
-
-
 
 </script>
-
 
 </body>
 
 </html>
+```

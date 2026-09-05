@@ -3,15 +3,12 @@
 <html lang="fa" dir="rtl">
 
 <head>
-
 <meta charset="UTF-8">
 
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-<title>
-ورود GAPINO
-</title>
+<title>ورود GAPINO</title>
 
 <style>
 
@@ -27,13 +24,9 @@ body{
 }
 
 body{
-
     min-height:100vh;
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
 
     background:
@@ -49,16 +42,13 @@ body{
     sans-serif;
 
     padding:20px;
-
 }
 
 .box{
-
     width:100%;
-
     max-width:420px;
 
-    background:white;
+    background:#fff;
 
     padding:30px;
 
@@ -67,13 +57,10 @@ body{
     box-shadow:
     0 20px 60px
     rgba(0,0,0,.12);
-
 }
 
 .logo{
-
     width:80px;
-
     height:80px;
 
     margin:0 auto;
@@ -87,35 +74,26 @@ body{
         #315bdc
     );
 
-    color:white;
+    color:#fff;
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
 
     font-size:28px;
-
     font-weight:bold;
-
 }
 
 h1{
-
     text-align:center;
-
     color:#1d2940;
 
     margin:
     20px 0 15px;
-
 }
 
 input{
-
     width:100%;
-
     height:52px;
 
     margin-top:12px;
@@ -133,27 +111,20 @@ input{
     outline:none;
 
     direction:ltr;
-
     text-align:left;
-
 }
 
 input:focus{
-
     border-color:#4f7cff;
-
 }
 
 button{
-
     width:100%;
-
     height:52px;
 
     margin-top:15px;
 
     border:0;
-
     border-radius:14px;
 
     background:
@@ -163,10 +134,9 @@ button{
         #315bdc
     );
 
-    color:white;
+    color:#fff;
 
     font-size:16px;
-
     font-weight:bold;
 
     cursor:pointer;
@@ -174,26 +144,18 @@ button{
     transition:
     opacity .2s ease,
     transform .1s ease;
-
 }
 
 button:active{
-
-    transform:
-    scale(.99);
-
+    transform:scale(.99);
 }
 
 button:disabled{
-
     opacity:.6;
-
     cursor:not-allowed;
-
 }
 
 .message{
-
     text-align:center;
 
     margin-top:15px;
@@ -203,29 +165,17 @@ button:disabled{
     min-height:30px;
 
     font-size:14px;
-
 }
 
 .error{
-
     color:#d33;
-
 }
 
 .success{
-
     color:#198754;
-
-}
-
-.hide{
-
-    display:none !important;
-
 }
 
 a{
-
     display:block;
 
     text-align:center;
@@ -237,83 +187,45 @@ a{
     text-decoration:none;
 
     font-size:14px;
-
-}
-
-.timer{
-
-    text-align:center;
-
-    margin-top:10px;
-
-    color:#777;
-
-    font-size:13px;
-
 }
 
 @media(max-width:480px){
 
     body{
-
         padding:14px;
-
     }
 
     .box{
-
         padding:24px 18px;
-
         border-radius:20px;
-
     }
 
     .logo{
-
         width:72px;
-
         height:72px;
-
         font-size:25px;
-
     }
 
     h1{
-
         font-size:22px;
-
     }
-
 }
 
 </style>
-
 </head>
 
 
 <body>
 
-
 <div class="box">
-
-
-    <!-- =========================
-         LOGO
-    ========================== -->
 
     <div class="logo">
         GAP
     </div>
 
-
     <h1>
         ورود GAPINO
     </h1>
-
-
-    <!-- =========================
-         MOBILE
-    ========================== -->
 
     <input
         id="mobile"
@@ -324,128 +236,50 @@ a{
         placeholder="09120000000"
     >
 
-
-    <!-- =========================
-         SEND CODE
-    ========================== -->
+    <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="رمز عبور"
+    >
 
     <button
-        id="sendCode"
+        id="loginButton"
         type="button"
     >
-        ارسال کد ورود
+        ورود
     </button>
-
-
-    <!-- =========================
-         CODE
-    ========================== -->
-
-    <div
-        id="codeBox"
-        class="hide"
-    >
-
-        <input
-            id="code"
-            type="tel"
-            inputmode="numeric"
-            maxlength="6"
-            autocomplete="one-time-code"
-            placeholder="کد ۶ رقمی"
-        >
-
-
-        <button
-            id="loginButton"
-            type="button"
-        >
-            ورود
-        </button>
-
-    </div>
-
-
-    <!-- =========================
-         TIMER
-    ========================== -->
-
-    <div
-        id="timer"
-        class="timer hide"
-    ></div>
-
-
-    <!-- =========================
-         MESSAGE
-    ========================== -->
 
     <div
         id="message"
         class="message"
     ></div>
 
-
-    <!-- =========================
-         REGISTER
-    ========================== -->
-
     <a href="register.html">
-        ساخت حساب جدید
+       اگه حساب نداری ساخت حساب جدید
     </a>
-
 
 </div>
 
 
 <script>
 
-// =====================================================
-// API
-// =====================================================
-
 const API =
     "https://gapino3.onrender.com";
 
 
-// =====================================================
-// ELEMENTS
-// =====================================================
-
 const mobile =
     document.getElementById("mobile");
 
-const code =
-    document.getElementById("code");
-
-const sendCode =
-    document.getElementById("sendCode");
+const password =
+    document.getElementById("password");
 
 const loginButton =
     document.getElementById("loginButton");
 
-const codeBox =
-    document.getElementById("codeBox");
-
 const message =
     document.getElementById("message");
 
-const timer =
-    document.getElementById("timer");
-
-
-// =====================================================
-// STATE
-// =====================================================
-
-let currentPhone = "";
-
-let timerInterval = null;
-
-
-// =====================================================
-// MESSAGE
-// =====================================================
 
 function showMessage(
     text,
@@ -460,10 +294,6 @@ function showMessage(
 }
 
 
-// =====================================================
-// NORMALIZE PHONE
-// =====================================================
-
 function normalizePhone(
     value
 ){
@@ -474,7 +304,6 @@ function normalizePhone(
         .replace(/\s+/g, "");
 
 
-    // +98xxxxxxxxxx
     if(
         phone.startsWith("+98")
     ){
@@ -485,8 +314,6 @@ function normalizePhone(
 
     }
 
-
-    // 98xxxxxxxxxx
     else if(
         phone.startsWith("98")
     ){
@@ -502,462 +329,193 @@ function normalizePhone(
 }
 
 
-// =====================================================
-// TIMER
-// =====================================================
+async function login(){
 
-function startTimer(
-    seconds = 60
-){
+    const phone =
+        normalizePhone(
+            mobile.value
+        );
 
-    clearInterval(
-        timerInterval
-    );
+    const pass =
+        password.value;
 
 
-    let remaining =
-        seconds;
+    if(
+        !/^09\d{9}$/.test(phone)
+    ){
+
+        showMessage(
+            "شماره موبایل اشتباه است",
+            "error"
+        );
+
+        return;
+    }
 
 
-    sendCode.disabled =
+    if(
+        pass.length < 1
+    ){
+
+        showMessage(
+            "رمز عبور را وارد کنید",
+            "error"
+        );
+
+        return;
+    }
+
+
+    loginButton.disabled =
         true;
 
 
-    timer.classList.remove(
-        "hide"
+    showMessage(
+        "در حال ورود...",
+        ""
     );
 
 
-    timer.textContent =
-        `ارسال مجدد تا ${remaining} ثانیه`;
+    const form =
+        new FormData();
 
 
-    timerInterval =
-        setInterval(
-            () => {
+    form.append(
+        "mobile",
+        phone
+    );
 
-                remaining--;
-
-
-                if(
-                    remaining <= 0
-                ){
-
-                    clearInterval(
-                        timerInterval
-                    );
+    form.append(
+        "password",
+        pass
+    );
 
 
-                    sendCode.disabled =
-                        false;
+    try{
+
+        const controller =
+            new AbortController();
 
 
-                    timer.textContent =
-                        "اکنون می‌توانید دوباره کد بگیرید";
+        const timeout =
+            setTimeout(
+                () => controller.abort(),
+                20000
+            );
 
 
-                    return;
+        const response =
+            await fetch(
+                API + "/login",
+                {
+                    method:"POST",
 
+                    body:form,
+
+                    credentials:"include",
+
+                    cache:"no-store",
+
+                    signal:
+                        controller.signal
                 }
-
-
-                timer.textContent =
-                    `ارسال مجدد تا ${remaining} ثانیه`;
-
-            },
-            1000
-        );
-
-}
-
-
-// =====================================================
-// SEND CODE
-// =====================================================
-
-sendCode.onclick =
-    async () => {
-
-        const phone =
-            normalizePhone(
-                mobile.value
             );
 
 
-        // -------------------------------
-        // CHECK PHONE
-        // -------------------------------
+        clearTimeout(
+            timeout
+        );
+
+
+        const data =
+            await response.json();
+
 
         if(
-            !/^09\d{9}$/.test(phone)
+            !data.success
         ){
-
-            showMessage(
-                "شماره موبایل اشتباه است",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        currentPhone =
-            phone;
-
-
-        mobile.value =
-            phone;
-
-
-        sendCode.disabled =
-            true;
-
-
-        showMessage(
-            "در حال ارسال کد...",
-            ""
-        );
-
-
-        // -------------------------------
-        // FORM DATA
-        // -------------------------------
-
-        const form =
-            new FormData();
-
-
-        form.append(
-            "mobile",
-            phone
-        );
-
-
-        try{
-
-            // ---------------------------
-            // SEND TO GAPINO
-            // ---------------------------
-
-            const res =
-                await fetch(
-                    API + "/send-code",
-                    {
-                        method:"POST",
-                        body:form,
-                        cache:"no-store"
-                    }
-                );
-
-
-            // ---------------------------
-            // RESPONSE
-            // ---------------------------
-
-            const data =
-                await res.json();
-
-
-            // ---------------------------
-            // SUCCESS
-            // ---------------------------
-
-            if(
-                data.success
-            ){
-
-                showMessage(
-                    "کد ورود به همین شماره پیامک شد",
-                    "success"
-                );
-
-
-                codeBox.classList.remove(
-                    "hide"
-                );
-
-
-                code.focus();
-
-
-                startTimer(
-                    60
-                );
-
-
-            }
-
-            // ---------------------------
-            // FAILED
-            // ---------------------------
-
-            else{
-
-                sendCode.disabled =
-                    false;
-
-
-                showMessage(
-                    data.message ||
-                    "ارسال کد ناموفق بود",
-                    "error"
-                );
-
-            }
-
-
-        }
-
-        catch(error){
-
-            console.error(
-                "SEND CODE ERROR:",
-                error
-            );
-
-
-            sendCode.disabled =
-                false;
-
-
-            showMessage(
-                "خطا در ارتباط با سرور",
-                "error"
-            );
-
-        }
-
-    };
-
-
-// =====================================================
-// VERIFY + LOGIN
-// =====================================================
-
-loginButton.onclick =
-    async () => {
-
-        const phone =
-            currentPhone ||
-            normalizePhone(
-                mobile.value
-            );
-
-
-        const otp =
-            code.value.trim();
-
-
-        // -------------------------------
-        // CHECK PHONE
-        // -------------------------------
-
-        if(
-            !/^09\d{9}$/.test(phone)
-        ){
-
-            showMessage(
-                "شماره موبایل اشتباه است",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        // -------------------------------
-        // CHECK OTP
-        // -------------------------------
-
-        if(
-            !/^\d{6}$/.test(otp)
-        ){
-
-            showMessage(
-                "کد باید ۶ رقمی باشد",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        loginButton.disabled =
-            true;
-
-
-        showMessage(
-            "در حال بررسی کد...",
-            ""
-        );
-
-
-        try{
-
-            // =================================
-            // VERIFY CODE
-            // =================================
-
-            const verifyForm =
-                new FormData();
-
-
-            verifyForm.append(
-                "mobile",
-                phone
-            );
-
-
-            verifyForm.append(
-                "code",
-                otp
-            );
-
-
-            const verify =
-                await fetch(
-                    API + "/verify-code",
-                    {
-                        method:"POST",
-                        body:verifyForm,
-                        cache:"no-store"
-                    }
-                );
-
-
-            const verifyData =
-                await verify.json();
-
-
-            if(
-                !verifyData.success
-            ){
-
-                loginButton.disabled =
-                    false;
-
-
-                showMessage(
-                    verifyData.message ||
-                    "کد اشتباه است",
-                    "error"
-                );
-
-
-                return;
-
-            }
-
-
-            // =================================
-            // LOGIN
-            // =================================
-
-            const loginForm =
-                new FormData();
-
-
-            loginForm.append(
-                "mobile",
-                phone
-            );
-
-
-            const login =
-                await fetch(
-                    API + "/login",
-                    {
-                        method:"POST",
-                        body:loginForm,
-                        credentials:"include",
-                        cache:"no-store"
-                    }
-                );
-
-
-            const loginData =
-                await login.json();
-
-
-            if(
-                loginData.success
-            ){
-
-                showMessage(
-                    "ورود موفق. انتقال...",
-                    "success"
-                );
-
-
-                localStorage.setItem(
-
-                    "gapino_user",
-
-                    JSON.stringify(
-                        loginData.user
-                    )
-
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        window.location.href =
-                            "chat.html";
-
-                    },
-                    800
-                );
-
-
-            }
-
-            else{
-
-                loginButton.disabled =
-                    false;
-
-
-                showMessage(
-                    loginData.message ||
-                    "ورود ناموفق بود",
-                    "error"
-                );
-
-            }
-
-
-        }
-
-        catch(error){
-
-            console.error(
-                "VERIFY / LOGIN ERROR:",
-                error
-            );
-
 
             loginButton.disabled =
                 false;
 
 
             showMessage(
+                data.message ||
+                "ورود ناموفق بود",
+                "error"
+            );
+
+            return;
+        }
+
+
+        localStorage.setItem(
+            "gapino_user",
+            JSON.stringify(
+                data.user
+            )
+        );
+
+
+        showMessage(
+            "ورود موفق. انتقال...",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "chat.html";
+
+            },
+            500
+        );
+
+
+    }
+
+    catch(error){
+
+        console.error(
+            "LOGIN ERROR:",
+            error
+        );
+
+
+        loginButton.disabled =
+            false;
+
+
+        if(
+            error.name === "AbortError"
+        ){
+
+            showMessage(
+                "زمان اتصال به سرور تمام شد",
+                "error"
+            );
+
+        }
+
+        else{
+
+            showMessage(
                 "خطا در ارتباط با سرور",
                 "error"
             );
 
         }
 
-    };
+    }
+
+}
 
 
-// =====================================================
-// ENTER KEY
-// =====================================================
+loginButton.onclick =
+    login;
+
 
 mobile.addEventListener(
     "keydown",
@@ -967,7 +525,7 @@ mobile.addEventListener(
             event.key === "Enter"
         ){
 
-            sendCode.click();
+            password.focus();
 
         }
 
@@ -975,7 +533,7 @@ mobile.addEventListener(
 );
 
 
-code.addEventListener(
+password.addEventListener(
     "keydown",
     (event) => {
 
@@ -983,7 +541,7 @@ code.addEventListener(
             event.key === "Enter"
         ){
 
-            loginButton.click();
+            login();
 
         }
 

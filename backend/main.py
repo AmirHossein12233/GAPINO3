@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi.responses import (
     FileResponse,
-    JSONResponse,
 )
 
 from starlette.middleware.sessions import SessionMiddleware
@@ -34,28 +33,8 @@ import os
 import re
 import secrets
 import uuid
-import time
 
-import requests
-
-
-# =========================================================
-# AMOOT SMS SETTINGS
-# =========================================================
-
-AMOOT_TOKEN = os.getenv(
-    "AMOOT_TOKEN",
-    "1F6E30ACE8511ADC9E80C1260AF9D299A37CC76A",
-)
-
-AMOOT_SEND_SIMPLE_URL = (
-    "https://portal.amootsms.com/rest/SendSimple"
-)
-
-AMOOT_LINE_NUMBER = os.getenv(
-    "AMOOT_LINE_NUMBER",
-    "Public",
-)
+import shutil
 
 
 # =========================================================
@@ -84,8 +63,6 @@ USERS_FILE = DATA_DIR / "users.json"
 
 MESSAGES_FILE = DATA_DIR / "messages.json"
 
-CODES_FILE = DATA_DIR / "codes.json"
-
 
 # =========================================================
 # CREATE FILES
@@ -96,8 +73,6 @@ for file, default in [
     (USERS_FILE, []),
 
     (MESSAGES_FILE, []),
-
-    (CODES_FILE, {}),
 
 ]:
 
@@ -129,10 +104,13 @@ def read_json(path):
 
     except Exception:
 
-        if path == CODES_FILE:
-            return {}
+        if path == USERS_FILE:
+            return []
 
-        return []
+        if path == MESSAGES_FILE:
+            return []
+
+        return {}
 
 
 def save_json(path, data):
@@ -171,185 +149,6 @@ def tehran_time():
 
 
 # =========================================================
-# AMOOT SMS
-# =========================================================
-
-def send_sms_simple(
-    mobile: str,
-    message: str,
-):
-    """
-    ارسال پیامک عادی از طریق SendSimple آموت.
-    """
-
-    if not AMOOT_TOKEN:
-
-        return {
-            "success": False,
-            "message": "توکن آموت تنظیم نشده است",
-            "raw": "",
-        }
-
-
-    mobile = mobile.strip()
-
-
-    if not re.match(
-        r"^09\d{9}$",
-        mobile,
-    ):
-
-        return {
-            "success": False,
-            "message": "شماره موبایل نامعتبر است",
-            "raw": "",
-        }
-
-
-    payload = {
-        "token": AMOOT_TOKEN,
-
-        "Mobiles": mobile,
-
-        # ارسال فوری
-        # عمداً خالی است تا وارد زمان‌بندی نشود
-        "SendDateTime": "",
-
-        "SMSMessageText": message,
-
-        "LineNumber": AMOOT_LINE_NUMBER,
-    }
-
-
-    headers = {
-        "Content-Type":
-        "application/x-www-form-urlencoded",
-    }
-
-
-    try:
-
-        response = requests.post(
-
-            AMOOT_SEND_SIMPLE_URL,
-
-            data=payload,
-
-            headers=headers,
-
-            timeout=20,
-
-        )
-
-
-        raw_text = (
-            response.text
-            if response.text
-            else ""
-        )
-
-
-        print("==============================")
-        print("AMOOT SMS RESPONSE")
-        print(
-            "HTTP:",
-            response.status_code,
-        )
-        print(
-            "BODY:",
-            raw_text,
-        )
-        print("==============================")
-
-
-        if not response.ok:
-
-            return {
-                "success": False,
-                "message":
-                    "ارتباط با سرویس پیامک ناموفق بود",
-                "raw":
-                    raw_text,
-            }
-
-
-        try:
-
-            result = response.json()
-
-        except Exception:
-
-            result = None
-
-
-        if isinstance(
-            result,
-            dict,
-        ):
-
-            status = str(
-                result.get(
-                    "Status",
-                    "",
-                )
-            ).strip().lower()
-
-
-            if status == "success":
-
-                return {
-                    "success": True,
-                    "message":
-                        "پیامک با موفقیت ارسال شد",
-                    "raw":
-                        result,
-                }
-
-
-            # خطاهای آموت را برگردان
-            error_text = (
-                result.get("Status")
-                or result.get("MessageText")
-                or "ارسال پیامک ناموفق بود"
-            )
-
-
-            return {
-                "success": False,
-                "message":
-                    str(error_text),
-                "raw":
-                    result,
-            }
-
-
-        return {
-            "success": True,
-            "message":
-                "درخواست ارسال پیامک ثبت شد",
-            "raw":
-                raw_text,
-        }
-
-
-    except requests.RequestException as e:
-
-        print(
-            "AMOOT REQUEST ERROR:",
-            e,
-        )
-
-
-        return {
-            "success": False,
-            "message":
-                "ارتباط با آموت برقرار نشد",
-            "raw":
-                str(e),
-        }
-
-
-# =========================================================
 # PASSWORD
 # =========================================================
 
@@ -357,18 +156,23 @@ def hash_password(
     password: str,
 ):
 
+    password = str(password)
+
     salt = secrets.token_hex(
         16
     )
-
 
     digest = hashlib.pbkdf2_hmac(
 
         "sha256",
 
-        password.encode(),
+        password.encode(
+            "utf-8"
+        ),
 
-        salt.encode(),
+        salt.encode(
+            "utf-8"
+        ),
 
         200000,
 
@@ -393,18 +197,37 @@ def verify_password(
 
     try:
 
-        _, _, salt, old = (
-            hashed.split("$")
-        )
+        if not hashed:
+            return False
 
 
-        new = hashlib.pbkdf2_hmac(
+        parts = hashed.split("$")
+
+
+        if len(parts) != 4:
+            return False
+
+
+        if parts[1] != "pbkdf2":
+            return False
+
+
+        salt = parts[2]
+
+        old_digest = parts[3]
+
+
+        new_digest = hashlib.pbkdf2_hmac(
 
             "sha256",
 
-            password.encode(),
+            str(password).encode(
+                "utf-8"
+            ),
 
-            salt.encode(),
+            salt.encode(
+                "utf-8"
+            ),
 
             200000,
 
@@ -412,8 +235,8 @@ def verify_password(
 
 
         return secrets.compare_digest(
-            new,
-            old,
+            new_digest,
+            old_digest,
         )
 
 
@@ -428,7 +251,17 @@ def verify_password(
 
 app = FastAPI(
     title="GAPINO",
-    version="5.0",
+    version="6.0",
+)
+
+
+# =========================================================
+# SESSION
+# =========================================================
+
+SESSION_SECRET = os.getenv(
+    "SESSION_SECRET",
+    "GAPINO-session-secret-change-this"
 )
 
 
@@ -436,30 +269,42 @@ app.add_middleware(
 
     SessionMiddleware,
 
-    secret_key=os.getenv(
-        "GAPINO_SECRET",
-        "CHANGE_THIS_SECRET",
-    ),
+    secret_key=SESSION_SECRET,
 
     session_cookie="gapino_session",
 
-    same_site="lax",
+    https_only=True,
 
-    https_only=False,
+    same_site="none",
+
 )
 
+
+# =========================================================
+# CORS
+# =========================================================
 
 app.add_middleware(
 
     CORSMiddleware,
 
-    allow_origins=["*"],
+    allow_origins=[
+        "https://gapino3.onrender.com",
+        "http://localhost",
+        "https://localhost",
+        "capacitor://localhost",
+    ],
 
     allow_credentials=True,
 
-    allow_methods=["*"],
+    allow_methods=[
+        "*"
+    ],
 
-    allow_headers=["*"],
+    allow_headers=[
+        "*"
+    ],
+
 )
 
 
@@ -488,9 +333,47 @@ def find_user_by_mobile(
 
     for user in users:
 
-        if user.get(
-            "mobile"
-        ) == mobile:
+        if (
+            str(
+                user.get(
+                    "mobile",
+                    ""
+                )
+            ).strip()
+            ==
+            mobile
+        ):
+
+            return user
+
+
+    return None
+
+
+def find_user_by_username(
+    username: str,
+):
+
+    users = read_json(
+        USERS_FILE
+    )
+
+
+    username_lower = username.lower()
+
+
+    for user in users:
+
+        if (
+            str(
+                user.get(
+                    "username",
+                    ""
+                )
+            ).lower()
+            ==
+            username_lower
+        ):
 
             return user
 
@@ -509,9 +392,16 @@ def find_user_by_id(
 
     for user in users:
 
-        if user.get(
-            "id"
-        ) == user_id:
+        if (
+            str(
+                user.get(
+                    "id",
+                    ""
+                )
+            )
+            ==
+            str(user_id)
+        ):
 
             return user
 
@@ -526,16 +416,25 @@ def public_user(
     return {
 
         "id":
-            user.get("id"),
+            user.get(
+                "id"
+            ),
 
         "username":
-            user.get("username"),
+            user.get(
+                "username"
+            ),
 
         "mobile":
-            user.get("mobile"),
+            user.get(
+                "mobile"
+            ),
 
         "avatar":
-            user.get("avatar", ""),
+            user.get(
+                "avatar",
+                "",
+            ),
 
         "status":
             user.get(
@@ -544,7 +443,9 @@ def public_user(
             ),
 
         "online":
-            user.get("id")
+            user.get(
+                "id"
+            )
             in active_connections,
 
     }
@@ -587,8 +488,8 @@ async def health():
         "time":
             tehran_time(),
 
-        "sms_configured":
-            bool(AMOOT_TOKEN),
+        "auth":
+            "mobile_password",
 
     }
 
@@ -604,12 +505,20 @@ async def register(
 
     mobile: str = Form(...),
 
+    password: str = Form(...),
+
 ):
 
     username = username.strip()
 
     mobile = mobile.strip()
 
+    password = password.strip()
+
+
+    # =====================================================
+    # USERNAME
+    # =====================================================
 
     if len(username) < 3:
 
@@ -619,7 +528,20 @@ async def register(
                 False,
 
             "message":
-                "نام کاربری کوتاه است",
+                "نام کاربری باید حداقل ۳ کاراکتر باشد",
+
+        }
+
+
+    if len(username) > 30:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "نام کاربری بیش از حد طولانی است",
 
         }
 
@@ -643,6 +565,10 @@ async def register(
         }
 
 
+    # =====================================================
+    # MOBILE
+    # =====================================================
+
     if not re.match(
 
         r"^09\d{9}$",
@@ -662,16 +588,68 @@ async def register(
         }
 
 
+    # =====================================================
+    # PASSWORD
+    # =====================================================
+
+    if len(password) < 6:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "رمز عبور باید حداقل ۶ کاراکتر باشد",
+
+        }
+
+
+    if len(password) > 128:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "رمز عبور بیش از حد طولانی است",
+
+        }
+
+
+    # =====================================================
+    # READ USERS
+    # =====================================================
+
     users = read_json(
         USERS_FILE
     )
 
 
-    for user in users:
+    # =====================================================
+    # DUPLICATE CHECK
+    # =====================================================
 
-        if user.get(
-            "username"
-        ) == username:
+    for existing_user in users:
+
+        existing_username = str(
+            existing_user.get(
+                "username",
+                ""
+            )
+        ).lower()
+
+
+        existing_mobile = str(
+            existing_user.get(
+                "mobile",
+                ""
+            )
+        )
+
+
+        if existing_username == username.lower():
 
             return {
 
@@ -679,14 +657,12 @@ async def register(
                     False,
 
                 "message":
-                    "نام کاربری وجود دارد",
+                    "این نام کاربری قبلاً ثبت شده است",
 
             }
 
 
-        if user.get(
-            "mobile"
-        ) == mobile:
+        if existing_mobile == mobile:
 
             return {
 
@@ -694,15 +670,21 @@ async def register(
                     False,
 
                 "message":
-                    "شماره قبلا ثبت شده",
+                    "این شماره موبایل قبلاً ثبت شده است",
 
             }
 
+
+    # =====================================================
+    # CREATE USER
+    # =====================================================
 
     user = {
 
         "id":
-            str(uuid.uuid4()),
+            str(
+                uuid.uuid4()
+            ),
 
         "username":
             username,
@@ -711,7 +693,9 @@ async def register(
             mobile,
 
         "password":
-            hash_password(mobile),
+            hash_password(
+                password
+            ),
 
         "avatar":
             "",
@@ -744,292 +728,13 @@ async def register(
         "success":
             True,
 
+        "message":
+            "حساب با موفقیت ساخته شد",
+
         "user":
-            public_user(user),
-
-    }
-
-
-# =========================================================
-# SEND OTP
-# =========================================================
-
-@app.post("/send-code")
-async def send_code(
-
-    mobile: str = Form(...),
-
-):
-
-    mobile = mobile.strip()
-
-
-    if not re.match(
-
-        r"^09\d{9}$",
-
-        mobile,
-
-    ):
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "شماره موبایل اشتباه است",
-
-        }
-
-
-    codes = read_json(
-        CODES_FILE
-    )
-
-
-    old = codes.get(
-        mobile
-    )
-
-
-    if old:
-
-        last_timestamp = old.get(
-            "timestamp",
-            0,
-        )
-
-
-        elapsed = (
-            time.time()
-            -
-            last_timestamp
-        )
-
-
-        if elapsed < 60:
-
-            remaining = max(
-                1,
-                int(
-                    60 - elapsed
-                ),
-            )
-
-
-            return {
-
-                "success":
-                    False,
-
-                "message":
-                    f"لطفاً {remaining} ثانیه صبر کنید",
-
-            }
-
-
-    # =====================================================
-    # CREATE 6 DIGIT CODE
-    # =====================================================
-
-    code = str(
-
-        secrets.randbelow(
-            900000
-        )
-        +
-        100000
-
-    )
-
-
-    sms_text = (
-        f"کد ورود GAPINO: {code}"
-    )
-
-
-    # =====================================================
-    # SEND SMS
-    # =====================================================
-
-    sms_result = send_sms_simple(
-
-        mobile,
-
-        sms_text,
-
-    )
-
-
-    if not sms_result.get(
-        "success",
-        False,
-    ):
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                sms_result.get(
-                    "message",
-                    "ارسال پیامک ناموفق بود",
-                ),
-
-        }
-
-
-    # =====================================================
-    # SAVE OTP
-    # =====================================================
-
-    codes[mobile] = {
-
-        "code":
-            code,
-
-        "timestamp":
-            time.time(),
-
-        "created":
-            tehran_time(),
-
-    }
-
-
-    save_json(
-
-        CODES_FILE,
-
-        codes,
-
-    )
-
-
-    return {
-
-        "success":
-            True,
-
-        "message":
-            "کد ورود ارسال شد",
-
-    }
-
-
-# =========================================================
-# VERIFY OTP
-# =========================================================
-
-@app.post("/verify-code")
-async def verify_code(
-
-    mobile: str = Form(...),
-
-    code: str = Form(...),
-
-):
-
-    mobile = mobile.strip()
-
-    code = code.strip()
-
-
-    if not re.match(
-        r"^09\d{9}$",
-        mobile,
-    ):
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "شماره موبایل اشتباه است",
-
-        }
-
-
-    if not re.match(
-        r"^\d{6}$",
-        code,
-    ):
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "کد باید ۶ رقمی باشد",
-
-        }
-
-
-    codes = read_json(
-        CODES_FILE
-    )
-
-
-    saved = codes.get(
-        mobile
-    )
-
-
-    if not saved:
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "کدی برای این شماره وجود ندارد",
-
-        }
-
-
-    if time.time() - saved.get(
-        "timestamp",
-        0,
-    ) > 300:
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "کد منقضی شده است",
-
-        }
-
-
-    if saved.get(
-        "code"
-    ) != code:
-
-        return {
-
-            "success":
-                False,
-
-            "message":
-                "کد اشتباه است",
-
-        }
-
-
-    return {
-
-        "success":
-            True,
-
-        "message":
-            "کد تایید شد",
+            public_user(
+                user
+            ),
 
     }
 
@@ -1045,10 +750,58 @@ async def login(
 
     mobile: str = Form(...),
 
+    password: str = Form(...),
+
 ):
 
     mobile = mobile.strip()
 
+    password = password.strip()
+
+
+    # =====================================================
+    # VALIDATE MOBILE
+    # =====================================================
+
+    if not re.match(
+
+        r"^09\d{9}$",
+
+        mobile,
+
+    ):
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "شماره موبایل اشتباه است",
+
+        }
+
+
+    # =====================================================
+    # VALIDATE PASSWORD
+    # =====================================================
+
+    if not password:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "رمز عبور را وارد کنید",
+
+        }
+
+
+    # =====================================================
+    # FIND USER
+    # =====================================================
 
     user = find_user_by_mobile(
         mobile
@@ -1063,9 +816,42 @@ async def login(
                 False,
 
             "message":
-                "کاربر پیدا نشد",
+                "شماره موبایل یا رمز عبور اشتباه است",
 
         }
+
+
+    # =====================================================
+    # VERIFY PASSWORD
+    # =====================================================
+
+    if not verify_password(
+
+        password,
+
+        user.get(
+            "password",
+            ""
+        ),
+
+    ):
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "شماره موبایل یا رمز عبور اشتباه است",
+
+        }
+
+
+    # =====================================================
+    # CREATE SESSION
+    # =====================================================
+
+    request.session.clear()
 
 
     request.session[
@@ -1073,13 +859,23 @@ async def login(
     ] = user["id"]
 
 
+    request.session[
+        "logged_in"
+    ] = True
+
+
     return {
 
         "success":
             True,
 
+        "message":
+            "ورود موفق",
+
         "user":
-            public_user(user),
+            public_user(
+                user
+            ),
 
     }
 
@@ -1117,7 +913,9 @@ async def me(
             True,
 
         "user":
-            public_user(user),
+            public_user(
+                user
+            ),
 
     }
 
@@ -1140,7 +938,7 @@ async def logout(
             True,
 
         "message":
-            "خارج شدید",
+            "با موفقیت خارج شدید",
 
     }
 
@@ -1150,7 +948,30 @@ async def logout(
 # =========================================================
 
 @app.get("/users")
-async def users():
+async def users(
+    request: Request,
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "ابتدا وارد شوید",
+
+            "users":
+                [],
+
+        }
+
 
     all_users = read_json(
         USERS_FILE
@@ -1164,15 +985,17 @@ async def users():
 
         "users":
             [
-                public_user(user)
-                for user in all_users
+                public_user(
+                    item
+                )
+                for item in all_users
             ],
 
     }
 
 
 # =========================================================
-# MESSAGES GET
+# GET ALL MESSAGES
 # =========================================================
 
 @app.get("/messages")
@@ -1206,13 +1029,163 @@ async def get_messages(
     )
 
 
+    user_id = user["id"]
+
+
+    visible_messages = [
+
+        message
+
+        for message in data
+
+        if (
+            message.get(
+                "sender_id"
+            )
+            ==
+            user_id
+            or
+            message.get(
+                "receiver_id"
+            )
+            ==
+            user_id
+        )
+
+    ]
+
+
     return {
 
         "success":
             True,
 
         "messages":
-            data,
+            visible_messages,
+
+    }
+
+
+# =========================================================
+# GET CHAT MESSAGES
+# =========================================================
+
+@app.get("/messages/{other_user_id}")
+async def get_chat_messages(
+
+    request: Request,
+
+    other_user_id: str,
+
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "ابتدا وارد شوید",
+
+            "messages":
+                [],
+
+        }
+
+
+    other_user = find_user_by_id(
+        other_user_id
+    )
+
+
+    if not other_user:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "کاربر پیدا نشد",
+
+            "messages":
+                [],
+
+        }
+
+
+    data = read_json(
+        MESSAGES_FILE
+    )
+
+
+    current_id = user["id"]
+
+
+    messages = [
+
+        message
+
+        for message in data
+
+        if (
+
+            (
+                message.get(
+                    "sender_id"
+                )
+                ==
+                current_id
+
+                and
+
+                message.get(
+                    "receiver_id"
+                )
+                ==
+                other_user_id
+
+            )
+
+            or
+
+            (
+
+                message.get(
+                    "sender_id"
+                )
+                ==
+                other_user_id
+
+                and
+
+                message.get(
+                    "receiver_id"
+                )
+                ==
+                current_id
+
+            )
+
+        )
+
+    ]
+
+
+    return {
+
+        "success":
+            True,
+
+        "messages":
+            messages,
 
     }
 
@@ -1292,7 +1265,9 @@ async def send_message(
     message = {
 
         "id":
-            str(uuid.uuid4()),
+            str(
+                uuid.uuid4()
+            ),
 
         "sender_id":
             user["id"],
@@ -1305,6 +1280,15 @@ async def send_message(
 
         "created":
             tehran_time(),
+
+        "time":
+            tehran_time(),
+
+        "seen":
+            False,
+
+        "deleted":
+            False,
 
     }
 
@@ -1361,6 +1345,257 @@ async def send_message(
 
 
 # =========================================================
+# UPLOAD
+# =========================================================
+
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+
+
+ALLOWED_EXTENSIONS = {
+
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+
+    ".webm",
+    ".mp3",
+    ".wav",
+    ".ogg",
+    ".m4a",
+
+    ".pdf",
+
+    ".txt",
+
+    ".zip",
+
+}
+
+
+@app.post("/upload")
+async def upload_file(
+
+    request: Request,
+
+    file: UploadFile = File(...),
+
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "ابتدا وارد شوید",
+
+        }
+
+
+    if not file.filename:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "فایلی انتخاب نشده است",
+
+        }
+
+
+    original_name = Path(
+        file.filename
+    ).name
+
+
+    extension = Path(
+        original_name
+    ).suffix.lower()
+
+
+    if extension not in ALLOWED_EXTENSIONS:
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "نوع فایل مجاز نیست",
+
+        }
+
+
+    unique_name = (
+
+        str(
+            uuid.uuid4()
+        )
+
+        +
+
+        extension
+
+    )
+
+
+    destination = (
+        UPLOAD_DIR /
+        unique_name
+    )
+
+
+    total_size = 0
+
+
+    try:
+
+        with destination.open(
+            "wb"
+        ) as buffer:
+
+            while True:
+
+                chunk = await file.read(
+                    1024 * 1024
+                )
+
+
+                if not chunk:
+
+                    break
+
+
+                total_size += len(
+                    chunk
+                )
+
+
+                if total_size > MAX_UPLOAD_SIZE:
+
+                    buffer.close()
+
+
+                    if destination.exists():
+
+                        destination.unlink()
+
+
+                    return {
+
+                        "success":
+                            False,
+
+                        "message":
+                            "حجم فایل نباید بیشتر از ۱۰ مگابایت باشد",
+
+                    }
+
+
+                buffer.write(
+                    chunk
+                )
+
+
+    except Exception as e:
+
+        if destination.exists():
+
+            try:
+
+                destination.unlink()
+
+            except Exception:
+
+                pass
+
+
+        print(
+            "UPLOAD ERROR:",
+            e,
+        )
+
+
+        return {
+
+            "success":
+                False,
+
+            "message":
+                "آپلود فایل ناموفق بود",
+
+        }
+
+
+    return {
+
+        "success":
+            True,
+
+        "message":
+            "فایل با موفقیت آپلود شد",
+
+        "url":
+            "/uploads/" +
+            unique_name,
+
+        "filename":
+            original_name,
+
+        "size":
+            total_size,
+
+        "type":
+            file.content_type or "",
+
+    }
+
+
+# =========================================================
+# SERVE UPLOADS
+# =========================================================
+
+@app.get("/uploads/{file_name:path}")
+async def get_uploaded_file(
+    file_name: str,
+):
+
+    safe_name = Path(
+        file_name
+    ).name
+
+
+    file = (
+        UPLOAD_DIR /
+        safe_name
+    )
+
+
+    if not file.exists():
+
+        raise HTTPException(
+            status_code=404,
+            detail="File not found",
+        )
+
+
+    return FileResponse(
+        file
+    )
+
+
+# =========================================================
 # WEBSOCKET
 # =========================================================
 
@@ -1405,9 +1640,9 @@ async def websocket_endpoint(
             )
 
 
-            # =============================================
+            # =================================================
             # PING
-            # =============================================
+            # =================================================
 
             if message_type == "ping":
 
@@ -1422,9 +1657,9 @@ async def websocket_endpoint(
                 })
 
 
-            # =============================================
+            # =================================================
             # TYPING
-            # =============================================
+            # =================================================
 
             elif message_type == "typing":
 
@@ -1459,9 +1694,9 @@ async def websocket_endpoint(
                         pass
 
 
-            # =============================================
+            # =================================================
             # MESSAGE
-            # =============================================
+            # =================================================
 
             elif message_type == "message":
 
@@ -1478,7 +1713,22 @@ async def websocket_endpoint(
                 ).strip()
 
 
-                if not receiver_id or not text:
+                file_url = data.get(
+                    "file"
+                )
+
+
+                file_type = data.get(
+                    "file_type"
+                )
+
+
+                reply_to = data.get(
+                    "reply_to"
+                )
+
+
+                if not receiver_id:
 
                     continue
 
@@ -1493,6 +1743,11 @@ async def websocket_endpoint(
                     continue
 
 
+                if not text and not file_url:
+
+                    continue
+
+
                 messages_data = read_json(
                     MESSAGES_FILE
                 )
@@ -1501,7 +1756,9 @@ async def websocket_endpoint(
                 message = {
 
                     "id":
-                        str(uuid.uuid4()),
+                        str(
+                            uuid.uuid4()
+                        ),
 
                     "sender_id":
                         user_id,
@@ -1512,8 +1769,26 @@ async def websocket_endpoint(
                     "text":
                         text,
 
+                    "file":
+                        file_url or "",
+
+                    "file_type":
+                        file_type or "",
+
+                    "reply_to":
+                        reply_to,
+
                     "created":
                         tehran_time(),
+
+                    "time":
+                        tehran_time(),
+
+                    "seen":
+                        False,
+
+                    "deleted":
+                        False,
 
                 }
 
@@ -1585,10 +1860,13 @@ async def websocket_endpoint(
     finally:
 
         if (
+
             active_connections.get(
                 user_id
             )
+
             is websocket
+
         ):
 
             del active_connections[
@@ -1601,7 +1879,27 @@ async def websocket_endpoint(
 # =========================================================
 
 @app.get("/online-users")
-async def online_users():
+async def online_users(
+    request: Request,
+):
+
+    user = current_user(
+        request
+    )
+
+
+    if not user:
+
+        return {
+
+            "success":
+                False,
+
+            "users":
+                [],
+
+        }
+
 
     return {
 
@@ -1797,4 +2095,5 @@ if __name__ == "__main__":
         ),
 
         reload=False,
+
     )
